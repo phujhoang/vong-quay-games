@@ -1,0 +1,2408 @@
+<!DOCTYPE html>
+<html lang="vi">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="mobile-web-app-capable" content="yes">
+  <title>Vòng Quay Kinh Thánh • Lời Chúa</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
+  <style>
+    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:wght@700&amp;family=Inter:wght@400;500;600&amp;family=Space+Grotesk:wght@500;600&amp;display=swap');
+
+    :root {
+      --gold: #d4af37;
+      --gold-dark: #b8972e;
+      --crimson: #8b1e3f;
+      --navy: #1a2744;
+      --deep: #0f1629;
+    }
+
+    body {
+      font-family: 'Inter', system_ui, sans-serif;
+    }
+
+    /* ========== TV / FULL-SCREEN LAYOUT (đồng bộ Vòng quay Việt Nam) ========== */
+    :root { --topbar-h: 3.25rem; }
+    html, body {
+      height: 100%;
+      height: 100dvh;
+      max-height: 100dvh;
+      overflow: hidden;
+    }
+    body { margin: 0; }
+    .app-shell {
+      height: 100%; height: 100dvh; max-height: 100dvh;
+      display: flex; flex-direction: column; overflow: hidden;
+    }
+    .app-topbar { flex-shrink: 0; height: var(--topbar-h); }
+    .app-main {
+      flex: 1 1 auto; min-height: 0; overflow: hidden;
+      display: flex; flex-direction: column;
+      width: 100%; max-width: 100%; margin: 0 auto;
+      padding: 0.4rem 0.75rem 0.5rem; box-sizing: border-box;
+    }
+    #player-setup { flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    #main-game {
+      flex: 1 1 auto; min-height: 0; display: none;
+      flex-direction: column; overflow: hidden;
+    }
+    #main-game.is-active { display: flex !important; }
+    #main-game .tv-game-grid {
+      flex: 1 1 auto; min-height: 0; display: grid;
+      grid-template-columns: 1fr; gap: 0.5rem;
+      align-items: stretch; overflow: hidden;
+    }
+    @media (min-width: 1024px) {
+      #main-game .tv-game-grid {
+        grid-template-columns: minmax(280px, 38%) minmax(0, 1fr);
+        gap: 0.65rem;
+      }
+    }
+    #main-game .tv-wheel-col {
+      min-height: 0; display: flex; flex-direction: column;
+      align-items: center; justify-content: center; overflow: hidden;
+    }
+    #main-game .tv-puzzle-col {
+      min-height: 0; overflow: hidden; display: flex; flex-direction: column;
+    }
+    #main-game .tv-puzzle-panel {
+      flex: 1 1 auto; min-height: 0; overflow: hidden;
+      display: flex; flex-direction: column;
+      padding: 0.55rem 0.75rem !important;
+    }
+    #main-game #bilingual-question {
+      flex-shrink: 0; margin-bottom: 0.4rem !important;
+      padding: 0.4rem 0.6rem !important; font-size: 0.8rem;
+    }
+    #main-game .tv-players-hint-row {
+      flex-shrink: 0; margin-bottom: 0.35rem !important;
+      gap: 0.35rem !important; max-height: 22vh; overflow: hidden;
+    }
+    #main-game #visual-hint { max-height: 18vh; overflow: hidden; }
+    #main-game #visual-hint .visual-hint-card {
+      max-width: 200px !important; padding: 0.35rem !important;
+      transform: scale(0.92); transform-origin: center;
+    }
+    #main-game #puzzle-board {
+      flex: 1 1 auto; min-height: 0 !important; overflow: auto;
+      padding: 0.5rem !important; gap: 0.35rem 0.45rem !important;
+    }
+    #main-game #solved-phrase {
+      flex-shrink: 0; margin-top: 0.35rem !important; padding: 0.4rem !important;
+      min-height: 0 !important; max-height: 16vh; overflow: auto;
+    }
+    #main-game #puzzle-status {
+      flex-shrink: 0; margin-top: 0.2rem !important;
+      min-height: 1rem !important; font-size: 0.8rem;
+    }
+    #main-game .tv-keyboard-wrap {
+      flex-shrink: 0; margin-top: 0.35rem !important; padding-top: 0.35rem !important;
+    }
+    #main-game #keyboard { gap: 0.25rem !important; }
+    #main-game #keyboard button {
+      height: 2rem !important; font-size: 0.85rem !important;
+      border-radius: 0.6rem !important;
+    }
+    #main-game .tv-action-btns {
+      flex-shrink: 0; margin-top: 0.4rem !important; gap: 0.4rem !important;
+    }
+    #main-game .tv-action-btns button {
+      padding-top: 0.55rem !important; padding-bottom: 0.55rem !important;
+      font-size: 0.8rem !important;
+    }
+    #main-game .tv-footer-tip {
+      flex-shrink: 0; margin-top: 0.25rem !important;
+      font-size: 0.7rem !important; line-height: 1.2; opacity: 0.85;
+    }
+    #wheel-canvas {
+      max-width: min(48vh, 36vw, 480px);
+      max-height: min(48vh, 36vw, 480px);
+      width: auto; height: auto; border-width: 10px !important;
+    }
+    #spin-btn { height: 2.75rem !important; font-size: 0.95rem !important; max-width: 260px; }
+    :fullscreen .app-shell, :-webkit-full-screen .app-shell {
+      height: 100vh; max-height: 100vh;
+    }
+    .wheel-pointer {
+      position: absolute; top: -6px; left: 50%; transform: translateX(-50%);
+      z-index: 30; pointer-events: none; display: flex; flex-direction: column;
+      align-items: center; filter: drop-shadow(0 4px 8px rgba(0,0,0,0.55));
+    }
+    .wheel-pointer-arrow {
+      width: 0; height: 0;
+      border-left: 16px solid transparent; border-right: 16px solid transparent;
+      border-top: 28px solid #d4af37; position: relative;
+    }
+    .wheel-pointer-arrow::after {
+      content: ''; position: absolute; top: -28px; left: -10px; width: 0; height: 0;
+      border-left: 10px solid transparent; border-right: 10px solid transparent;
+      border-top: 18px solid #f4e9c8;
+    }
+    @media (min-width: 1280px) and (min-height: 720px) {
+      :root { --topbar-h: 3.5rem; }
+      .app-main { padding: 0.5rem 1rem 0.6rem; }
+      #main-game #keyboard button { height: 2.35rem !important; font-size: 0.95rem !important; }
+      .puzzle-tile { width: clamp(40px, 2.8vw, 56px); height: clamp(54px, 3.8vw, 72px); }
+    }
+    @media (max-height: 800px) {
+      #wheel-canvas { max-width: min(42vh, 32vw, 360px); max-height: min(42vh, 32vw, 360px); }
+      #main-game .tv-players-hint-row { max-height: 18vh; }
+      #main-game #visual-hint .visual-hint-card { transform: scale(0.82); }
+      #main-game .tv-footer-tip { display: none; }
+    }
+    /* ========== end TV layout ========== */
+
+
+    .game-font {
+      font-family: 'Space Grotesk', 'Inter', system_ui, sans-serif;
+      font-weight: 700;
+      letter-spacing: -0.02em;
+    }
+
+    .title-font {
+      font-family: 'Playfair Display', Georgia, serif;
+      font-weight: 700;
+      letter-spacing: -0.03em;
+    }
+
+    .sacred-bg {
+      background-image: linear-gradient(rgba(15, 22, 41, 0.88), rgba(15, 22, 41, 0.92)), url('assets/stage.jpg');
+      background-size: cover;
+      background-position: center;
+      background-attachment: fixed;
+    }
+
+    .gold-gradient {
+      background: linear-gradient(145deg, #f4e9c8, #d4af37, #b8972e, #d4af37);
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+    }
+
+    .game-panel {
+      background: rgba(26, 30, 50, 0.95);
+      backdrop-filter: blur(20px);
+      border: 1px solid #3a4266;
+    }
+
+    .premium-shadow {
+      box-shadow: 0 10px 40px -10px rgb(0 0 0 / 0.7),
+                  0 0 0 1px #3a4266;
+    }
+
+    .player-card {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+    }
+
+    .player-card.active {
+      border-color: #d4af37;
+      box-shadow: 0 0 0 3px rgba(212, 175, 55, 0.25),
+                  0 10px 30px -10px rgb(0 0 0 / 0.6);
+      transform: translateY(-2px);
+    }
+
+    .wheel-canvas {
+      border-radius: 9999px;
+      background: #111827;
+    }
+
+    .puzzle-tile {
+      transition: all 0.2s cubic-bezier(0.4, 0, 0.2, 1);
+      width: clamp(36px, 3.2vw, 52px);
+      height: clamp(48px, 4.2vw, 68px);
+      border-radius: 6px;
+      border: 3px solid #475569;
+      background: #1f2937;
+      box-shadow: 0 2px 4px rgb(0 0 0 / 0.3),
+                  inset 0 1px 0 rgb(255 255 255 / 0.1),
+                  inset 0 -2px 0 rgb(0 0 0 / 0.4);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+      position: relative;
+      overflow: hidden;
+    }
+
+    .puzzle-tile.revealed {
+      background: linear-gradient(180deg, #3a2f1f, #221c14);
+      border-color: #d4af37;
+      box-shadow: 0 0 0 1px #d4af37,
+                  0 4px 12px rgb(212 175 55 / 0.25),
+                  inset 0 1px 0 rgb(255 255 255 / 0.2);
+    }
+
+    /* TẤT CẢ Ô TRỐNG MÀU VÀNG NỔI BẬT - dễ nhìn độ dài câu trả lời (thành ngữ, món ăn, địa danh hoặc ca dao) */
+    /* Subtle blank before spinning (shows structure/positions but not active yellow) */
+    .puzzle-tile.hidden {
+      background: #1f2937;
+      border: 2px solid #475569;
+      box-shadow: 0 2px 4px rgb(0 0 0 / 0.3),
+                  inset 0 1px 0 rgb(255 255 255 / 0.1),
+                  inset 0 -2px 0 rgb(0 0 0 / 0.4);
+    }
+
+    .puzzle-tile.hidden::after {
+      content: '';
+      position: absolute;
+      bottom: 6px;
+      left: 12%;
+      width: 76%;
+      height: 4px;
+      background: #475569;
+      opacity: 0.7;
+      border-radius: 2px;
+    }
+
+    .puzzle-tile.hidden::before {
+      content: '_';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -55%);
+      font-size: clamp(16px, 1.6vw, 24px);
+      font-weight: 700;
+      color: #475569;
+      opacity: 0.4;
+      line-height: 1;
+    }
+
+    /* Bright yellow square blanks - appear ONLY after successful spin + having points (guessingMode) */
+    .puzzle-tile.hidden-guess {
+      background: #ffeb3b !important;
+      border: 6px solid #b45309 !important;
+      box-shadow: 0 0 0 5px #854d0e, inset 0 4px 8px rgba(0,0,0,0.12);
+      outline: 4px dashed #854d0e !important;
+      outline-offset: -10px;
+    }
+
+    .puzzle-tile.hidden-guess::after {
+      content: '';
+      position: absolute;
+      bottom: 8px;
+      left: 10%;
+      width: 80%;
+      height: 7px;
+      background: #854d0e !important;
+      opacity: 1;
+      border-radius: 3px;
+    }
+
+    .puzzle-tile.hidden-guess::before {
+      content: '_';
+      position: absolute;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -58%);
+      font-size: clamp(22px, 2.2vw, 32px);
+      font-weight: 900;
+      color: #854d0e;
+      opacity: 0.9;
+      line-height: 1;
+    }
+
+    .segment-text {
+      font-family: 'Space Grotesk', system_ui, sans-serif;
+      font-weight: 700;
+      letter-spacing: 0.5px;
+    }
+
+    .timer {
+      font-variant-numeric: tabular-nums;
+      font-family: 'Space Grotesk', system_ui, sans-serif;
+    }
+
+    .modal {
+      animation: modalPop 0.25s cubic-bezier(0.34, 1.56, 0.64, 1);
+    }
+
+    @keyframes modalPop {
+      from { opacity: 0; transform: scale(0.8) translateY(40px); }
+      to { opacity: 1; transform: scale(1) translateY(0); }
+    }
+
+    .confetti {
+      position: fixed;
+      z-index: 9999;
+      pointer-events: none;
+    }
+
+    .cross-icon {
+      font-size: 1.1rem;
+    }
+  </style>
+</head>
+<body class="sacred-bg text-[#e2e8f0] selection:bg-[#d4af37] selection:text-[#1a2744]">
+  <div class="app-shell">
+  <!-- Top Bar (TV) -->
+  <div class="app-topbar border-b border-[#3a4266] bg-[#0f1629]/95 backdrop-blur-xl z-50">
+    <div class="h-full max-w-[1920px] mx-auto px-3 sm:px-5 flex items-center justify-between">
+      <div class="flex items-center gap-x-2 sm:gap-x-3 min-w-0">
+        <div class="w-8 h-8 sm:w-9 sm:h-9 rounded-xl bg-gradient-to-br from-[#d4af37] via-[#f4e9c8] to-[#b8972e] flex items-center justify-center shadow-inner flex-shrink-0">
+          <i class="fa-solid fa-cross text-[#1a2744] text-lg"></i>
+        </div>
+        <div class="min-w-0">
+          <div class="title-font text-base sm:text-xl tracking-tighter font-bold truncate">VÒNG QUAY KINH THÁNH</div>
+          <div class="text-[9px] sm:text-[10px] text-[#64748b] -mt-0.5 tracking-[1.5px] truncate">KINH THÁNH • LỜI CHÚA • DỤ NGÔN • PHÚC ÂM</div>
+        </div>
+      </div>
+      <div class="flex items-center gap-x-1.5 sm:gap-x-2 text-sm flex-shrink-0">
+        <div class="flex items-center gap-x-1.5 px-2.5 py-1 rounded-xl bg-[#1a2744] border border-[#3a4266]">
+          <i class="fa-solid fa-users text-[#d4af37]"></i>
+          <span id="player-count-display" class="font-semibold text-xs sm:text-sm">4 NGƯỜI</span>
+        </div>
+        <button onclick="showHowToPlay()" class="flex items-center gap-x-1.5 px-2.5 py-1 rounded-xl bg-[#1a2744] hover:bg-[#242e52] border border-[#3a4266] text-xs sm:text-sm transition-colors">
+          <i class="fa-solid fa-question-circle"></i>
+          <span class="hidden md:inline">Luật / Rules</span>
+        </button>
+        <button onclick="toggleBackgroundMusic()" id="music-btn" class="flex items-center gap-x-1.5 px-2.5 py-1 rounded-xl bg-[#1a2744] hover:bg-[#242e52] border border-[#3a4266] text-xs sm:text-sm transition-colors">
+          <i class="fa-solid fa-volume-up"></i>
+          <span class="hidden md:inline">TẮT NHẠC</span>
+        </button>
+        <button onclick="toggleFullscreen()" id="fullscreen-btn" class="flex items-center gap-x-1.5 px-2.5 py-1 rounded-xl bg-[#1a2744] hover:bg-[#242e52] border border-[#d4af37] text-xs sm:text-sm transition-colors text-[#d4af37]" title="Toàn màn hình TV">
+          <i class="fa-solid fa-expand"></i>
+          <span class="hidden md:inline">TV</span>
+        </button>
+        <button onclick="restartFullGame()" class="flex items-center gap-x-1.5 px-2.5 py-1 rounded-xl bg-[#3a4266] hover:bg-[#475569] text-xs sm:text-sm transition-colors">
+          <i class="fa-solid fa-redo"></i>
+          <span class="hidden sm:inline">Chơi lại</span>
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <div class="app-main max-w-[1920px]">
+    <!-- Player Selection (shown at start) -->
+    <div id="player-setup" class="max-w-2xl mx-auto w-full">
+      <div class="game-panel rounded-3xl p-8 premium-shadow">
+        <div class="text-center mb-6">
+          <div class="text-3xl font-bold tracking-tighter title-font">Chọn số người chơi</div>
+          <p class="text-[#94a3b8] mt-1">Hỗ trợ từ 2 đến 5 người tranh đua</p>
+        </div>
+
+        <!-- Player count buttons -->
+        <div class="flex justify-center gap-3 mb-6" id="player-count-buttons">
+          <button onclick="selectPlayerCount(2)" class="player-count-btn px-6 py-3 rounded-2xl border-2 border-[#3a4266] hover:border-[#d4af37] text-lg font-semibold" data-count="2">2</button>
+          <button onclick="selectPlayerCount(3)" class="player-count-btn px-6 py-3 rounded-2xl border-2 border-[#3a4266] hover:border-[#d4af37] text-lg font-semibold" data-count="3">3</button>
+          <button onclick="selectPlayerCount(4)" class="player-count-btn px-6 py-3 rounded-2xl border-2 border-[#3a4266] hover:border-[#d4af37] text-lg font-semibold active" data-count="4">4</button>
+          <button onclick="selectPlayerCount(5)" class="player-count-btn px-6 py-3 rounded-2xl border-2 border-[#3a4266] hover:border-[#d4af37] text-lg font-semibold" data-count="5">5</button>
+        </div>
+
+        <!-- Name inputs (dynamic) -->
+        <div id="name-inputs" class="mb-6">
+          <!-- Populated by JS when count selected -->
+        </div>
+
+        <div class="text-center">
+          <button onclick="confirmPlayerSetup()" 
+                  class="px-10 py-3 rounded-3xl bg-gradient-to-r from-[#d4af37] to-[#b8972e] text-[#1a2744] font-extrabold tracking-[1.5px] text-lg">
+            BẮT ĐẦU TRÒ CHƠI
+          </button>
+        </div>
+        
+        <div class="mt-4 text-xs text-center text-[#64748b]">
+          Sau các vòng thường sẽ có <strong>Vòng Chung Kết</strong> và <strong>Câu Hỏi Nhanh</strong> để tranh thủ điểm thưởng.
+        </div>
+      </div>
+    </div>
+
+    <!-- Main Game Area (hidden until start) -->
+    <div id="main-game" class="hidden">
+      <div class="tv-game-grid">
+        
+        <!-- WHEEL + TIMER -->
+        <div class="tv-wheel-col">
+          <div class="flex flex-col items-center w-full px-1">
+            <!-- Timer -->
+            <div class="mb-3 w-full max-w-[320px]">
+              <div class="flex items-center justify-between text-xs uppercase tracking-[1.5px] text-[#64748b] mb-1.5 px-1">
+                <div>THỜI GIAN TRẢ LỜI</div>
+                <div id="timer-label" class="font-mono text-[#d4af37]">45s</div>
+              </div>
+              <div class="h-3 bg-[#1a2744] rounded-full overflow-hidden border border-[#3a4266]">
+                <div id="timer-bar" class="h-3 bg-gradient-to-r from-[#d4af37] to-[#f4e9c8] transition-all" style="width: 100%"></div>
+              </div>
+            </div>
+
+            <!-- Wheel: mũi tên vàng chỉ điểm dừng -->
+            <div class="relative wheel-container inline-block">
+              <div class="wheel-pointer" aria-hidden="true" title="Điểm dừng">
+                <div class="wheel-pointer-arrow"></div>
+              </div>
+              <canvas id="wheel-canvas" width="420" height="420"
+                      class="wheel-canvas cursor-pointer border-[10px] border-[#1a2744]"
+                      onclick="spinWheel()"></canvas>
+            </div>
+
+            <!-- Spin Button -->
+            <div class="mt-4 w-full max-w-[300px]">
+              <button id="spin-btn"
+                      onclick="spinWheel()"
+                      class="w-full h-14 rounded-3xl text-lg font-extrabold tracking-[2px] flex items-center justify-center gap-x-3 bg-gradient-to-r from-[#d4af37] to-[#b8972e] text-[#1a2744] disabled:opacity-50 shadow-lg active:scale-[0.985] transition">
+                <i class="fa-solid fa-sync-alt"></i>
+                <span id="spin-text">QUAY BÁNH XE</span>
+              </button>
+              <div class="mt-2 text-center">
+                <span id="stake-display" class="text-sm font-semibold px-4 py-0.5 rounded-full bg-[#1a2744] border border-[#3a4266] text-[#d4af37]"></span>
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <!-- PUZZLE -->
+        <div class="tv-puzzle-col">
+          <div class="game-panel rounded-2xl premium-shadow tv-puzzle-panel">
+            <!-- Category -->
+            <div class="flex items-center justify-center mb-2">
+              <div class="px-6 py-1.5 rounded-2xl bg-[#1a2744] border border-[#3a4266] flex items-center gap-x-2">
+                <span class="uppercase text-[#64748b] text-xs tracking-[2px] font-bold">CHỦ ĐỀ</span>
+                <span id="category-label" class="font-extrabold text-[#e0f2fe] tracking-wider"></span>
+              </div>
+            </div>
+
+            <!-- Bilingual question / prompt - shows before spinning the wheel each round -->
+            <div id="bilingual-question" class="hidden mb-4 p-3 text-center bg-[#1a2744] border border-[#d4af37] rounded-2xl text-sm">
+            </div>
+
+            <div class="tv-players-hint-row flex flex-col lg:flex-row items-stretch">
+              <div class="w-full lg:w-36 xl:w-40 flex-shrink-0">
+                <div class="uppercase text-[#64748b] text-[9px] tracking-[1.5px] mb-0.5 px-0.5 font-semibold">NGƯỜI CHƠI</div>
+                <div id="players-left" class="grid grid-cols-1 gap-1"></div>
+              </div>
+              <div id="visual-hint" class="flex-1 min-w-0 flex justify-center items-center"></div>
+              <div class="w-full lg:w-28 xl:w-32 flex-shrink-0">
+                <div id="players-right" class="grid grid-cols-1 gap-1"></div>
+              </div>
+            </div>
+
+            <!-- Puzzle Board -->
+            <div id="puzzle-board" 
+                 class="min-h-[180px] flex flex-wrap items-center justify-center gap-x-3 gap-y-3 p-6 rounded-2xl bg-[#0f1629] border border-[#3a4266]">
+              <!-- Populated by JS -->
+            </div>
+
+            <!-- PROMINENT BILINGUAL ANSWER DISPLAY - shows full answer bilingually after solving -->
+            <div id="solved-phrase" 
+                 class="hidden mt-4 p-4 text-center bg-[#1a2744] border-2 border-[#d4af37] rounded-2xl shadow-inner"
+                 style="min-height: 90px; overflow: visible;">
+              <!-- JS injects: ĐÁP ÁN / ANSWER + VN phrase + English translation -->
+            </div>
+
+            <div id="puzzle-status" class="mt-3 text-center text-sm text-[#64748b] min-h-[18px]"></div>
+
+            <div class="tv-keyboard-wrap border-t border-[#3a4266]">
+              <div class="flex items-center justify-between mb-3 px-1">
+                <div class="text-xs uppercase tracking-[1.5px] text-[#64748b]">ĐOÁN CHỮ CÁI (BÀN PHÍM HOẶC NHẤN TRỰC TIẾP)</div>
+                <div class="text-xs text-[#64748b]">Người chơi hiện tại: <span id="current-player-name" class="font-bold text-[#d4af37]"></span></div>
+              </div>
+              <div id="keyboard" class="grid grid-cols-6 sm:grid-cols-8 md:grid-cols-10 lg:grid-cols-11 gap-2">
+                <!-- Populated by JS -->
+              </div>
+            </div>
+
+            <div class="tv-action-btns flex">
+              <button onclick="buyVowel()" id="buy-vowel-btn"
+                      class="flex-1 py-3 rounded-2xl bg-[#1a2744] hover:bg-[#242e52] border border-[#3a4266] text-sm font-semibold flex items-center justify-center gap-x-2 disabled:opacity-40">
+                <i class="fa-solid fa-shopping-bag"></i>
+                <span>MUA NGUYÊN ÂM <span class="text-[#d4af37]">(300)</span></span>
+              </button>
+              <button onclick="attemptSolve()" 
+                      class="flex-1 py-3 rounded-2xl bg-[#3a4266] hover:bg-[#475569] border border-[#64748b] text-sm font-semibold flex items-center justify-center gap-x-2">
+                <i class="fa-solid fa-keyboard"></i>
+                <span>GIẢI ĐÁP</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+      </div>
+
+      <div class="tv-footer-tip text-center text-[#64748b]">
+        Mỗi lượt có <span class="font-semibold text-[#d4af37]">45 giây</span>. Đoán đúng → tiếp tục lượt. Sai hoặc hết giờ → chuyển người chơi tiếp theo.
+      </div>
+    </div>
+  </div><!-- /.app-main -->
+  </div><!-- /.app-shell -->
+  <!-- End Game Modal -->
+  <div id="end-modal" onclick="if (event.target.id === 'end-modal') hideEndModal()" 
+       class="hidden fixed inset-0 bg-black/90 backdrop-blur-md z-[200] flex items-center justify-center p-6">
+    <div onclick="event.stopImmediatePropagation()" 
+         class="modal game-panel w-full max-w-md rounded-3xl p-8 text-center border border-[#3a4266]">
+      
+      <div class="text-6xl mb-3">
+        <i class="fa-solid fa-trophy text-[#d4af37]"></i>
+      </div>
+      <div class="text-3xl font-extrabold tracking-tighter mb-1" id="winner-name"></div>
+      <div class="text-[#d4af37] mb-6">CHIẾN THẮNG VÒNG QUAY KINH THÁNH!</div>
+
+      <div id="final-scores" class="space-y-2 mb-7 text-left">
+        <!-- Populated by JS -->
+      </div>
+
+      <div class="flex gap-3">
+        <button onclick="restartFullGame()" 
+                class="flex-1 py-3.5 rounded-2xl bg-gradient-to-r from-[#d4af37] to-[#b8972e] text-[#1a2744] font-extrabold tracking-wider">
+          CHƠI VÒNG MỚI
+        </button>
+        <button onclick="hideEndModal()" 
+                class="flex-1 py-3.5 rounded-2xl bg-[#1a2744] border border-[#3a4266] font-semibold">
+          ĐÓNG
+        </button>
+      </div>
+    </div>
+  </div>
+
+  <!-- How to Play Modal -->
+  <div id="how-modal" onclick="if (event.target.id === 'how-modal') hideHowToPlay()" 
+       class="hidden fixed inset-0 bg-black/90 backdrop-blur z-[210] flex items-center justify-center p-6">
+    <div onclick="event.stopImmediatePropagation()" 
+         class="modal game-panel w-full max-w-lg rounded-3xl p-7 border border-[#3a4266]">
+      <div class="flex items-center justify-between mb-5">
+        <div class="text-xl font-bold tracking-tight">LUẬT CHƠI VÒNG QUAY KINH THÁNH</div>
+        <button onclick="hideHowToPlay()" class="text-[#64748b] hover:text-white"><i class="fa-solid fa-times text-xl"></i></button>
+      </div>
+
+      <div class="space-y-4 text-sm text-[#cbd5e1]">
+        <div>
+          <strong class="text-[#d4af37]">1. Quay bánh xe</strong><br>
+          Người chơi hiện tại nhấn <strong>QUAY BÁNH XE</strong>. Bánh xe có các giá trị điểm, PHÁ SẢN, MẤT LƯỢT.
+        </div>
+        <div>
+          <strong class="text-[#d4af37]">2. Đoán chữ cái</strong><br>
+          Sau khi quay được điểm, bạn đoán một chữ cái (phụ âm). Nếu đúng, chữ xuất hiện và bạn được tiếp tục lượt.
+        </div>
+        <div>
+          <strong class="text-[#d4af37]">3. Mua nguyên âm</strong><br>
+          Dùng điểm để mua A, Ă, Â, E, Ê, I, O, Ô, Ơ, U, Ư, Y (mỗi nguyên âm 300 điểm).
+        </div>
+        <div>
+          <strong class="text-[#d4af37]">4. Giải đáp</strong><br>
+          Khi bạn biết câu trả lời, nhấn <strong>GIẢI ĐÁP</strong> và nhập đầy đủ câu trả lời (thành ngữ, món ăn, địa danh hoặc ca dao).
+        </div>
+        <div>
+          <strong class="text-[#d4af37]">5. Thời gian</strong><br>
+          Mỗi lượt có <strong>45 giây</strong>. Hết giờ hoặc đoán sai → chuyển sang người chơi tiếp theo.
+        </div>
+        <div class="pt-2 border-t border-[#3a4266] text-xs">
+          Người chơi có tổng điểm cao nhất sau nhiều vòng là người chiến thắng. Chúc bạn khám phá Văn Hóa Việt Nam vui vẻ!
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <script>
+    // ==================== TAILWIND + THEME ====================
+    function initTailwind() {
+      document.documentElement.style.setProperty('--accent', '#d4af37');
+    }
+
+    // ==================== PUZZLES KINH THÁNH • LỜI CHÚA ====================
+    // Chuyên về Kinh Thánh, Dụ Ngôn, Phúc Âm, Lời Chúa, Thánh Vịnh, Các Thánh
+    const PUZZLES = [
+      // KINH THÁNH
+      { category: "KINH THÁNH", phrase: "THIÊN CHÚA LÀ TÌNH YÊU", english: "GOD IS LOVE" },
+      { category: "KINH THÁNH", phrase: "TA LÀ BÁNH SỐNG", english: "I AM THE BREAD OF LIFE" },
+      { category: "KINH THÁNH", phrase: "HÃY YÊU THƯƠNG NHAU", english: "LOVE ONE ANOTHER" },
+      { category: "KINH THÁNH", phrase: "CHÚA LÀ MỤC TỬ TÔI", english: "THE LORD IS MY SHEPHERD" },
+      { category: "KINH THÁNH", phrase: "TA LÀ ÁNH SÁNG", english: "I AM THE LIGHT OF THE WORLD" },
+      { category: "KINH THÁNH", phrase: "HÃY CẦU NGUYỆN", english: "PRAY WITHOUT CEASING" },
+      { category: "KINH THÁNH", phrase: "LẠY CHA CHÚNG CON", english: "OUR FATHER IN HEAVEN" },
+      { category: "KINH THÁNH", phrase: "SỰ SỐNG ĐỜI ĐỜI", english: "ETERNAL LIFE" },
+
+      // DỤ NGÔN
+      { category: "DỤ NGÔN", phrase: "NGƯỜI SAMARITANÔ", english: "THE GOOD SAMARITAN" },
+      { category: "DỤ NGÔN", phrase: "NGÔI NHÀ TRÊN ĐÁ", english: "THE HOUSE BUILT ON THE ROCK" },
+      { category: "DỤ NGÔN", phrase: "MỤC TỬ TỐT LÀNH", english: "THE GOOD SHEPHERD" },
+      { category: "DỤ NGÔN", phrase: "NGƯỜI CON HOANG ĐÀNG", english: "THE PRODIGAL SON" },
+      { category: "DỤ NGÔN", phrase: "KHO TÀNG VÀ NGỌC TRAI", english: "THE HIDDEN TREASURE AND THE PEARL" },
+
+      // PHÚC ÂM
+      { category: "PHÚC ÂM", phrase: "PHÚC CHO NGƯỜI NGHÈO", english: "BLESSED ARE THE POOR IN SPIRIT" },
+      { category: "PHÚC ÂM", phrase: "PHÚC CHO NGƯỜI THƯƠNG XÓT", english: "BLESSED ARE THE MERCIFUL" },
+      { category: "PHÚC ÂM", phrase: "TA LÀ SỰ SỐNG LẠI", english: "I AM THE RESURRECTION AND THE LIFE" },
+      { category: "PHÚC ÂM", phrase: "HÃY LÀM MÔN ĐỆ", english: "GO AND MAKE DISCIPLES" },
+      { category: "PHÚC ÂM", phrase: "AI YÊU THƯƠNG ANH EM", english: "IF YOU LOVE ME, KEEP MY COMMANDS" },
+      { category: "PHÚC ÂM", phrase: "HÃY ĐẾN MÀ XEM", english: "COME AND YOU WILL SEE" },
+
+      // LỜI CHÚA
+      { category: "LỜI CHÚA", phrase: "HÃY THEO THẦY", english: "FOLLOW ME" },
+      { category: "LỜI CHÚA", phrase: "CHÚA YÊU THẾ GIAN", english: "GOD SO LOVED THE WORLD" },
+      { category: "LỜI CHÚA", phrase: "TÌNH YÊU KHÔNG TÀN", english: "LOVE NEVER FAILS" },
+      { category: "LỜI CHÚA", phrase: "TA LÀ ĐƯỜNG SỐNG", english: "I AM THE WAY, THE TRUTH AND THE LIFE" },
+
+      // THÁNH VỊNH
+      { category: "THÁNH VỊNH", phrase: "CHÚA LÀ ÁNH SÁNG", english: "THE LORD IS MY LIGHT" },
+      { category: "THÁNH VỊNH", phrase: "LẠY CHÚA XIN THƯƠNG XÓT", english: "LORD, HAVE MERCY ON ME" },
+
+      // CÁC THÁNH
+      { category: "CÁC THÁNH", phrase: "ĐỨC MARIA MẸ CHÚA", english: "MARY, MOTHER OF GOD" },
+      { category: "CÁC THÁNH", phrase: "THÁNH GIUSE", english: "SAINT JOSEPH" },
+      { category: "CÁC THÁNH", phrase: "ĐỨC TIN CỨU CHÚNG TA", english: "FAITH SAVES US" },
+    ];
+
+    // Wheel segments (faith + fun mix)
+    const SEGMENTS = [
+      { label: "200", type: "cash", value: 200 },
+      { label: "300", type: "cash", value: 300 },
+      { label: "PHÁ SẢN", type: "bankrupt", value: 0 },
+      { label: "500", type: "cash", value: 500 },
+      { label: "800", type: "cash", value: 800 },
+      { label: "MẤT LƯỢT", type: "lose_turn", value: 0 },
+      { label: "1.000", type: "cash", value: 1000 },
+      { label: "600", type: "cash", value: 600 },
+      { label: "GẤP ĐÔI", type: "double", value: 2 },
+      { label: "1.500", type: "cash", value: 1500 },
+      { label: "THÊM 15s", type: "time", value: 15 },
+      { label: "400", type: "cash", value: 400 },
+      { label: "MẤT LƯỢT", type: "lose_turn", value: 0 },
+      { label: "2.000", type: "cash", value: 2000 },
+      { label: "700", type: "cash", value: 700 },
+      { label: "PHÁ SẢN", type: "bankrupt", value: 0 },
+      { label: "5.000", type: "cash", value: 5000 },
+      { label: "900", type: "cash", value: 900 },
+    ];
+
+    const VOWELS = ['A', 'Ă', 'Â', 'E', 'Ê', 'I', 'O', 'Ô', 'Ơ', 'U', 'Ư', 'Y'];
+    // Only consonants (phụ âm) are freely selectable via keyboard.
+    // Vowels (nguyên âm) can ONLY be chosen after buying with "MUA NGUYÊN ÂM".
+    const KEYBOARD_LETTERS = ['B','C','D','Đ','F','G','H','K','L','M','N','P','Q','R','S','T','V','X'];
+
+    // ==================== STATE ====================
+    let players = [];
+    let currentPlayerIndex = 0;
+    let currentPuzzle = null;
+    let revealed = [];
+    let usedLetters = new Set();
+    let spinning = false;
+    let roundSolved = false;
+    let currentStake = 0;
+    let guessingMode = false;
+    let timerInterval = null;
+    let timeLeft = 45;
+    let solvedPuzzles = new Set();
+    let roundNumber = 1;
+    let selectedPlayerCount = 4;
+    let isFinalRound = false;
+    let quickQuestionActive = false;
+
+    let audioCtx = null;
+    let canvas, ctx;
+    let wheelRotation = 0;
+    let lastSegmentForSound = -1;
+    let backgroundMusicInterval = null;
+    let musicEnabled = false;
+
+    // ==================== UTILITIES ====================
+    function getBaseLetter(char) {
+      if (!char) return '';
+      let s = char.normalize('NFD').replace(/[\u0300-\u036f]/g, '').toUpperCase();
+      if (s === 'Đ') s = 'D';
+      return s;
+    }
+
+    // Returns the canonical VOWEL key (one of A Ă Â E Ê I O Ô Ơ U Ư Y)
+    // ignoring tones (grave, acute, hook, tilde, dot-below) but preserving
+    // the main vowel diacritic (breve, circumflex, horn).
+    // This makes buying "E" correctly reveal Ẹ È É Ẻ Ẽ etc., but not Ê or A.
+    function getVowelKey(char) {
+      if (!char) return '';
+      const upper = char.toUpperCase();
+      const map = {
+        'A':'A','À':'A','Á':'A','Ả':'A','Ã':'A','Ạ':'A',
+        'Ă':'Ă','Ằ':'Ă','Ắ':'Ă','Ẳ':'Ă','Ẵ':'Ă','Ặ':'Ă',
+        'Â':'Â','Ầ':'Â','Ấ':'Â','Ẩ':'Â','Ẫ':'Â','Ậ':'Â',
+        'E':'E','È':'E','É':'E','Ẻ':'E','Ẽ':'E','Ẹ':'E',
+        'Ê':'Ê','Ề':'Ê','Ế':'Ê','Ể':'Ê','Ễ':'Ê','Ệ':'Ê',
+        'I':'I','Ì':'I','Í':'I','Ỉ':'I','Ĩ':'I','Ị':'I',
+        'O':'O','Ò':'O','Ó':'O','Ỏ':'O','Õ':'O','Ọ':'O',
+        'Ô':'Ô','Ồ':'Ô','Ố':'Ô','Ổ':'Ô','Ỗ':'Ô','Ộ':'Ô',
+        'Ơ':'Ơ','Ờ':'Ơ','Ớ':'Ơ','Ở':'Ơ','Ỡ':'Ơ','Ợ':'Ơ',
+        'U':'U','Ù':'U','Ú':'U','Ủ':'U','Ũ':'U','Ụ':'U',
+        'Ư':'Ư','Ừ':'Ư','Ứ':'Ư','Ử':'Ư','Ữ':'Ư','Ự':'Ư',
+        'Y':'Y','Ỳ':'Y','Ý':'Y','Ỷ':'Y','Ỹ':'Y','Ỵ':'Y'
+      };
+      return map[upper] || upper;
+    }
+
+    // Robust normalize for full phrase solve (GIẢI ĐÁP)
+    // Handles tones, Đ/D, multiple spaces, case
+    function normalizeForSolve(str) {
+      if (!str) return '';
+      let s = str.normalize('NFD').replace(/[\u0300-\u036f]/g, '');
+      s = s.replace(/Đ/g, 'D').replace(/đ/g, 'd');
+      s = s.toUpperCase().trim().replace(/\s+/g, ' ');
+      return s;
+    }
+
+    function isVowel(letter) {
+      return VOWELS.includes(letter.toUpperCase());
+    }
+
+    function shuffleArray(array) {
+      const a = [...array];
+      for (let i = a.length - 1; i > 0; i--) {
+        const j = Math.floor(Math.random() * (i + 1));
+        [a[i], a[j]] = [a[j], a[i]];
+      }
+      return a;
+    }
+
+    function initAudio() {
+      if (audioCtx) return;
+      try {
+        audioCtx = new (window.AudioContext || window.webkitAudioContext)();
+      } catch (e) {}
+    }
+
+    function playSound(type) {
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+
+      if (type === 'correct') {
+        [520, 660, 820].forEach((freq, i) => {
+          const o = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          o.type = 'sine';
+          o.frequency.value = freq;
+          g.gain.value = 0.08 / (i + 1);
+          g.gain.setValueAtTime(g.gain.value, now);
+          g.gain.linearRampToValueAtTime(0.0001, now + 0.6 + i * 0.05);
+          o.connect(g); g.connect(audioCtx.destination);
+          o.start(now + i * 0.015); o.stop(now + 1.1);
+        });
+      } else if (type === 'wrong' || type === 'timeout') {
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.type = 'sawtooth';
+        o.frequency.value = 140;
+        g.gain.value = 0.12;
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.45);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(now); o.stop(now + 0.5);
+      } else if (type === 'win') {
+        const notes = [440, 550, 660, 880];
+        notes.forEach((f, i) => {
+          const o = audioCtx.createOscillator();
+          const g = audioCtx.createGain();
+          o.type = 'sine';
+          o.frequency.value = f;
+          g.gain.value = 0.1;
+          g.gain.setValueAtTime(0.1, now + i * 0.08);
+          g.gain.linearRampToValueAtTime(0.0001, now + 1.6);
+          o.connect(g); g.connect(audioCtx.destination);
+          o.start(now + i * 0.08); o.stop(now + 2.1);
+        });
+      } else if (type === 'spin') {
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        const f = audioCtx.createBiquadFilter();
+        o.type = 'sawtooth';
+        o.frequency.value = 68;
+        f.type = 'lowpass';
+        f.frequency.value = 420;
+        g.gain.value = 0.2;
+        g.gain.linearRampToValueAtTime(0.0001, now + 1.8);
+        o.connect(f); f.connect(g); g.connect(audioCtx.destination);
+        o.start(now); o.stop(now + 2.0);
+      } else if (type === 'tick') {
+        const o = audioCtx.createOscillator();
+        const g = audioCtx.createGain();
+        o.type = 'square';
+        o.frequency.value = 720 + Math.random() * 60;
+        g.gain.value = 0.04;
+        g.gain.exponentialRampToValueAtTime(0.0001, now + 0.07);
+        o.connect(g); g.connect(audioCtx.destination);
+        o.start(now); o.stop(now + 0.09);
+      }
+    }
+
+    // Wheel of Fortune style spin sound: sharp, rhythmic "clack" per peg.
+    // Volume and rate scale with speed (louder and faster when spinning fast, slows and quiets as it stops).
+    // This closely mimics the classic TV show wheel clacking sound.
+    function playWheelClick(volume = 0.3) {
+      if (!audioCtx) return;
+      const now = audioCtx.currentTime;
+      const v = Math.max(0.08, volume); // ensure minimum audible
+
+      // Short sharp "clack" - combination of noise (for the tab hit) + quick low tone (body)
+      // 1. High-frequency noise burst for the crisp plastic/wood click (very short)
+      try {
+        const buffer = audioCtx.createBuffer(1, audioCtx.sampleRate * 0.06, audioCtx.sampleRate);
+        const data = buffer.getChannelData(0);
+        for (let i = 0; i < data.length; i++) {
+          // Fast decay envelope + slight high-pass feel
+          const env = 1 - (i / data.length);
+          data[i] = (Math.random() * 2 - 1) * env * env;
+        }
+        const noiseSrc = audioCtx.createBufferSource();
+        noiseSrc.buffer = buffer;
+
+        const noiseFilter = audioCtx.createBiquadFilter();
+        noiseFilter.type = 'bandpass';
+        noiseFilter.frequency.value = 1200 + Math.random() * 400;
+        noiseFilter.Q.value = 3.5;
+
+        const noiseGain = audioCtx.createGain();
+        noiseGain.gain.value = v * 0.85;
+        noiseGain.gain.linearRampToValueAtTime(0.0001, now + 0.055);
+
+        noiseSrc.connect(noiseFilter);
+        noiseFilter.connect(noiseGain);
+        noiseGain.connect(audioCtx.destination);
+        noiseSrc.start(now);
+      } catch (e) {}
+
+      // 2. Very short low "thud" for the peg impact (gives weight like real wheel)
+      const thud = audioCtx.createOscillator();
+      const thudGain = audioCtx.createGain();
+      const thudFilter = audioCtx.createBiquadFilter();
+
+      thud.type = 'sine';
+      thud.frequency.value = 95 + Math.random() * 25; // low and slightly varied
+
+      thudFilter.type = 'lowpass';
+      thudFilter.frequency.value = 280;
+
+      thudGain.gain.value = v * 0.55;
+      thudGain.gain.linearRampToValueAtTime(0.0001, now + 0.09);
+
+      thud.connect(thudFilter);
+      thudFilter.connect(thudGain);
+      thudGain.connect(audioCtx.destination);
+
+      thud.start(now);
+      thud.stop(now + 0.12);
+    }
+
+    function launchConfetti(count = 120) {
+      const colors = ['#d4af37', '#f4e9c8', '#8b1e3f', '#64748b'];
+      for (let i = 0; i < count; i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.style.left = Math.random() * 100 + 'vw';
+        c.style.top = '-10px';
+        c.style.width = (5 + Math.random() * 8) + 'px';
+        c.style.height = c.style.width;
+        c.style.background = colors[Math.floor(Math.random() * colors.length)];
+        c.style.opacity = 0.85;
+        c.style.borderRadius = Math.random() > 0.6 ? '50%' : '2px';
+        document.body.appendChild(c);
+
+        const duration = 2200 + Math.random() * 1400;
+        c.animate([
+          { transform: `translateY(0) rotate(0deg)`, opacity: 0.9 },
+          { transform: `translateY(${window.innerHeight + 100}px) rotate(${Math.random() * 480 - 120}deg)`, opacity: 0 }
+        ], { duration, easing: 'cubic-bezier(.22,.68,.32,.99)' }).onfinish = () => c.remove();
+      }
+    }
+
+    // ==================== PLAYER SETUP (2-5 players + names) ====================
+    function selectPlayerCount(count) {
+      selectedPlayerCount = count;
+
+      // Highlight active button
+      document.querySelectorAll('.player-count-btn').forEach(btn => {
+        btn.classList.remove('active', 'border-[#d4af37]');
+        btn.classList.add('border-[#3a4266]');
+        if (parseInt(btn.dataset.count) === count) {
+          btn.classList.add('active', 'border-[#d4af37]');
+        }
+      });
+
+      // Generate name inputs
+      renderNameInputs(count);
+    }
+
+    function renderNameInputs(count) {
+      const container = document.getElementById('name-inputs');
+      container.innerHTML = `
+        <div class="text-left mb-2 text-xs uppercase tracking-[1.5px] text-[#64748b]">Đặt tên người chơi (tùy chọn)</div>
+        <div class="grid gap-2" style="grid-template-columns: repeat(${Math.min(count, 3)}, 1fr)">
+          ${Array.from({length: count}, (_, i) => `
+            <div>
+              <input id="player-name-${i}" type="text" value="Người chơi ${i+1}" 
+                     class="w-full bg-[#1a2744] border border-[#3a4266] rounded-2xl px-4 py-2 text-sm focus:border-[#d4af37] outline-none">
+            </div>
+          `).join('')}
+        </div>
+      `;
+    }
+
+    function confirmPlayerSetup() {
+      const count = selectedPlayerCount || 4;
+      const names = [];
+      for (let i = 0; i < count; i++) {
+        const input = document.getElementById(`player-name-${i}`);
+        names.push(input ? input.value.trim() || `Người chơi ${i+1}` : `Người chơi ${i+1}`);
+      }
+      startGame(count, names);
+    }
+
+    // ==================== QUICK QUESTIONS (Câu Hỏi Nhanh) ====================
+    const QUICK_QUESTIONS = [
+      { q: "Ai là người viết sách Tin Mừng thứ tư?", options: ["Thánh Mátthêu", "Thánh Gioan", "Thánh Phêrô", "Thánh Luca"], correct: 1 },
+      { q: "Chúa Giêsu đã hóa bánh và cá cho bao nhiêu người ăn?", options: ["3000", "5000", "4000", "7000"], correct: 1 },
+      { q: "Thánh Vịnh nổi tiếng nhất nói về Chúa là mục tử bắt đầu bằng câu nào?", options: ["Chúa là ánh sáng", "Chúa là mục tử của tôi", "Hãy ca ngợi Chúa", "Lạy Chúa xin cứu con"], correct: 1 },
+      { q: "Đức Maria là ai của Chúa Giêsu?", options: ["Chị gái", "Mẹ", "Dì", "Bạn"], correct: 1 },
+      { q: "Câu Kinh Thánh 'Ta là sự sống lại và sự sống' do ai nói?", options: ["Thánh Phêrô", "Chúa Giêsu", "Thánh Phaolô", "Thánh Gioan Tẩy Giả"], correct: 1 },
+    ];
+
+    function triggerQuickQuestion() {
+      if (quickQuestionActive) return;
+      quickQuestionActive = true;
+      clearTimer();
+
+      const q = QUICK_QUESTIONS[Math.floor(Math.random() * QUICK_QUESTIONS.length)];
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black/90 z-[300] flex items-center justify-center p-6';
+      modal.innerHTML = `
+        <div class="game-panel rounded-3xl p-7 max-w-md w-full border border-[#d4af37]">
+          <div class="text-center mb-4">
+            <div class="inline-block px-4 py-1 rounded-full bg-[#d4af37] text-[#1a2744] text-xs font-extrabold tracking-widest">CÂU HỎI NHANH</div>
+          </div>
+          <div class="text-xl font-semibold mb-5 text-center">${q.q}</div>
+          <div class="grid gap-2" id="qq-options">
+            ${q.options.map((opt, idx) => `
+              <button class="qq-option w-full text-left px-5 py-3 rounded-2xl bg-[#1a2744] border border-[#3a4266] hover:border-[#d4af37] transition" data-idx="${idx}">
+                ${opt}
+              </button>
+            `).join('')}
+          </div>
+          <div class="mt-4 text-center text-xs text-[#64748b]">Đúng được +500 điểm thưởng • Sai không mất điểm</div>
+        </div>
+      `;
+
+      document.body.appendChild(modal);
+
+      const currentPIdx = currentPlayerIndex;
+      const buttons = modal.querySelectorAll('.qq-option');
+      buttons.forEach(btn => {
+        btn.onclick = () => {
+          const chosen = parseInt(btn.dataset.idx);
+          const isCorrect = chosen === q.correct;
+          buttons.forEach(b => b.disabled = true);
+
+          if (isCorrect) {
+            players[currentPIdx].total += 500;
+            playSound('win');
+            btn.classList.add('!border-[#22c55e]', '!bg-[#052e16]');
+            setTimeout(() => {
+              modal.remove();
+              quickQuestionActive = false;
+              updateUI();
+              document.getElementById('puzzle-status').innerHTML = `+500 điểm thưởng! Tuyệt vời!`;
+              setTimeout(startNewTurn, 1200);
+            }, 900);
+          } else {
+            playSound('wrong');
+            btn.classList.add('!border-red-500');
+            buttons[q.correct].classList.add('!border-[#22c55e]');
+            setTimeout(() => {
+              modal.remove();
+              quickQuestionActive = false;
+              nextPlayer();
+            }, 1400);
+          }
+        };
+      });
+    }
+
+    // ==================== WHEEL DRAWING ====================
+    function drawWheel() {
+      canvas = document.getElementById('wheel-canvas');
+      ctx = canvas.getContext('2d');
+      const w = canvas.width;
+      const h = canvas.height;
+      const cx = w / 2;
+      const cy = h / 2;
+      const radius = Math.min(w, h) / 2 - 12;
+
+      ctx.clearRect(0, 0, w, h);
+      ctx.save();
+
+      ctx.translate(cx, cy);
+      ctx.rotate((wheelRotation * Math.PI) / 180);
+
+      const segmentAngle = (Math.PI * 2) / SEGMENTS.length;
+
+      SEGMENTS.forEach((seg, i) => {
+        const startAngle = i * segmentAngle - Math.PI / 2;
+        const endAngle = startAngle + segmentAngle;
+        const midAngle = startAngle + segmentAngle / 2;
+
+        let baseColor;
+        if (seg.type === 'bankrupt') baseColor = '#3a1f1f';
+        else if (seg.type === 'lose_turn') baseColor = '#2c2522';
+        else if (seg.type === 'double' || seg.type === 'time') baseColor = '#1f3a2f';
+        else {
+          const palette = ['#1f2a44', '#2a1f2a', '#1f352a', '#2f2a1f', '#1f2a38'];
+          baseColor = palette[i % palette.length];
+        }
+
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.arc(0, 0, radius, startAngle, endAngle);
+        ctx.closePath();
+        ctx.fillStyle = baseColor;
+        ctx.fill();
+
+        const grad = ctx.createRadialGradient(0, 0, radius * 0.2, 0, 0, radius * 0.98);
+        grad.addColorStop(0, 'rgba(255,255,255,0.035)');
+        grad.addColorStop(1, 'rgba(0,0,0,0.45)');
+        ctx.fillStyle = grad;
+        ctx.fill();
+
+        ctx.strokeStyle = '#d4af37';
+        ctx.lineWidth = 2.2;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(Math.cos(startAngle) * radius, Math.sin(startAngle) * radius);
+        ctx.stroke();
+
+        ctx.strokeStyle = 'rgba(244,233,200,0.4)';
+        ctx.lineWidth = 1;
+        ctx.beginPath();
+        ctx.moveTo(0, 0);
+        ctx.lineTo(Math.cos(startAngle) * radius, Math.sin(startAngle) * radius);
+        ctx.stroke();
+
+        ctx.save();
+        ctx.rotate(midAngle);
+        ctx.translate(radius * 0.64, 0);
+
+        let textColor = '#f4e9c8';
+        if (seg.type === 'bankrupt' || seg.type === 'lose_turn') textColor = '#c9a38f';
+        if (seg.type === 'double' || seg.type === 'time') textColor = '#86efac';
+
+        ctx.fillStyle = textColor;
+        ctx.font = seg.label.length > 5 ? 'bold 13.5px "Space Grotesk", system-ui' : 'bold 16px "Space Grotesk", system-ui';
+        ctx.textAlign = 'center';
+        ctx.textBaseline = 'middle';
+        ctx.shadowColor = 'rgba(0,0,0,0.7)';
+        ctx.shadowBlur = 3;
+        ctx.shadowOffsetY = 1;
+
+        if (seg.label.length > 5) {
+          ctx.rotate(Math.PI / 2);
+          ctx.fillText(seg.label, 0, 0);
+        } else {
+          ctx.fillText(seg.label, 0, 0);
+        }
+        ctx.restore();
+      });
+
+      ctx.restore();
+
+      // Outer rings
+      ctx.strokeStyle = '#d4af37';
+      ctx.lineWidth = 10;
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius + 1, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#1a2744';
+      ctx.lineWidth = 6;
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius + 12, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.strokeStyle = '#f4e9c8';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(cx, cy, radius - 4, 0, Math.PI * 2);
+      ctx.stroke();
+
+      // Center hub
+      const hubGrad = ctx.createRadialGradient(cx - 10, cy - 12, 5, cx + 8, cy + 10, 38);
+      hubGrad.addColorStop(0, '#f4e9c8');
+      hubGrad.addColorStop(0.35, '#d4af37');
+      hubGrad.addColorStop(1, '#8c6f1f');
+
+      ctx.fillStyle = hubGrad;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 28, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.fillStyle = '#1a2744';
+      ctx.beginPath();
+      ctx.arc(cx, cy, 15, 0, Math.PI * 2);
+      ctx.fill();
+
+      ctx.strokeStyle = '#d4af37';
+      ctx.lineWidth = 1.5;
+      ctx.beginPath();
+      ctx.arc(cx, cy, 15, 0, Math.PI * 2);
+      ctx.stroke();
+
+      ctx.fillStyle = '#d4af37';
+      ctx.font = 'bold 12px "Space Grotesk"';
+      ctx.textAlign = 'center';
+      ctx.textBaseline = 'middle';
+      ctx.fillText('KINH', cx, cy - 4);
+      ctx.fillText('VIỆT', cx, cy + 8);
+    }
+
+    function getSegmentIndexAtPointer() {
+      const n = SEGMENTS.length;
+      const segmentAngle = 360 / n;
+      const rot = ((wheelRotation % 360) + 360) % 360;
+      const fromTop = (360 - rot + 0.0001) % 360;
+      let index = Math.floor(fromTop / segmentAngle);
+      return ((index % n) + n) % n;
+    }
+
+    function getLandedSegment() {
+      const index = getSegmentIndexAtPointer();
+      return { index, segment: SEGMENTS[index] };
+    }
+
+    function rotationForSegmentCenter(index) {
+      const n = SEGMENTS.length;
+      const segmentAngle = 360 / n;
+      return ((360 - (index * segmentAngle + segmentAngle / 2)) % 360 + 360) % 360;
+    }
+
+    function snapRotationToSegmentCenter(index) {
+      const targetMod = rotationForSegmentCenter(index);
+      const currentMod = ((wheelRotation % 360) + 360) % 360;
+      const base = wheelRotation - currentMod;
+      let a = base + targetMod;
+      let b = base + targetMod + 360;
+      let c = base + targetMod - 360;
+      const dist = (x) => Math.abs(x - wheelRotation);
+      wheelRotation = [a, b, c].sort((p, q) => dist(p) - dist(q))[0];
+    }
+
+    function sizeWheelToScreen() {
+      const canvasEl = document.getElementById('wheel-canvas');
+      if (!canvasEl) return;
+      const vh = window.innerHeight || 800;
+      const vw = window.innerWidth || 1280;
+      let size = Math.floor(Math.min(vh * 0.48, vw * 0.34, 480));
+      size = Math.max(240, size);
+      if (Math.abs(canvasEl.width - size) < 8) return;
+      canvasEl.width = size;
+      canvasEl.height = size;
+      canvasEl.style.width = size + 'px';
+      canvasEl.style.height = size + 'px';
+      if (typeof drawWheel === 'function') { try { drawWheel(); } catch (e) {} }
+    }
+
+    function toggleFullscreen() {
+      const root = document.documentElement;
+      const btn = document.getElementById('fullscreen-btn');
+      const isFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+      const after = () => {
+        const nowFs = !!(document.fullscreenElement || document.webkitFullscreenElement);
+        if (btn) {
+          btn.innerHTML = nowFs
+            ? '<i class="fa-solid fa-compress"></i> <span class="hidden md:inline">THOÁT</span>'
+            : '<i class="fa-solid fa-expand"></i> <span class="hidden md:inline">TV</span>';
+        }
+        setTimeout(sizeWheelToScreen, 120);
+      };
+      if (!isFs) {
+        const req = root.requestFullscreen || root.webkitRequestFullscreen || root.msRequestFullscreen;
+        if (req) {
+          Promise.resolve(req.call(root)).then(after).catch(() => {
+            alert('Bấm F11 (Windows) hoặc Control+Command+F (Mac) để toàn màn hình TV.');
+          });
+        } else {
+          alert('Bấm F11 để toàn màn hình trên TV.');
+        }
+      } else {
+        const exit = document.exitFullscreen || document.webkitExitFullscreen || document.msExitFullscreen;
+        if (exit) Promise.resolve(exit.call(document)).then(after);
+      }
+      document.addEventListener('fullscreenchange', after, { once: true });
+      document.addEventListener('webkitfullscreenchange', after, { once: true });
+    }
+
+    // ==================== GAME LOGIC ====================
+    function startGame(numPlayers, names = null) {
+      document.getElementById('player-setup').classList.add('hidden');
+      const __main = document.getElementById('main-game');
+      __main.classList.remove('hidden');
+      __main.classList.add('is-active');
+      document.body.classList.add('tv-playing');
+
+      players = [];
+      for (let i = 0; i < numPlayers; i++) {
+        players.push({
+          id: i,
+          name: (names && names[i]) ? names[i] : `Người chơi ${i + 1}`,
+          bank: 0,
+          total: 0
+        });
+      }
+
+      currentPlayerIndex = 0;
+      roundNumber = 1;
+      isFinalRound = false;
+      solvedPuzzles.clear();
+      roundSolved = false;
+
+      document.getElementById('player-count-display').textContent = `${numPlayers} NGƯỜI CHƠI`;
+
+      renderPlayers();
+      initWheel();
+      if (typeof sizeWheelToScreen === 'function') sizeWheelToScreen();
+      initKeyboard();
+      pickNewPuzzle();
+      updateUI();
+      startNewTurn();
+    }
+
+    function renderPlayers() {
+      const leftContainer = document.getElementById('players-left');
+      const rightContainer = document.getElementById('players-right');
+      if (!leftContainer || !rightContainer) return;
+      leftContainer.innerHTML = '';
+      rightContainer.innerHTML = '';
+      const leftCount = Math.min(3, players.length);
+      const leftPlayers = players.slice(0, leftCount);
+      const rightPlayers = players.slice(leftCount);
+      function makeCard(p, idx) {
+        const isActive = idx === currentPlayerIndex;
+        const div = document.createElement('div');
+        div.className = 'player-card game-panel rounded-2xl p-2 border text-xs ' + (isActive ? 'active border-[#d4af37]' : 'border-[#3a4266]');
+        div.innerHTML = `
+          <div class="flex items-center justify-between">
+            <div>
+              <div class="text-[9px] uppercase tracking-[1px] text-[#64748b]">NGƯỜI ${idx + 1}</div>
+              <div class="font-semibold leading-none mt-0.5 text-sm">${p.name}</div>
+            </div>
+            ${isActive ? '<i class="fa-solid fa-cross text-[#d4af37] text-base"></i>' : ''}
+          </div>
+          <div class="mt-1 flex justify-between items-end text-[10px]">
+            <div><div class="text-[#64748b]">Vòng</div><div class="font-semibold tabular-nums text-[#d4af37]">${p.bank}</div></div>
+            <div class="text-right"><div class="text-[#64748b]">Tổng</div><div class="font-semibold tabular-nums">${p.total}</div></div>
+          </div>`;
+        return div;
+      }
+      leftPlayers.forEach((p, i) => leftContainer.appendChild(makeCard(p, i)));
+      rightPlayers.forEach((p, i) => rightContainer.appendChild(makeCard(p, leftCount + i)));
+    }
+
+    function updateCurrentPlayerUI() {
+      const nameEl = document.getElementById('current-player-name');
+      if (players[currentPlayerIndex]) {
+        nameEl.textContent = players[currentPlayerIndex].name.toUpperCase();
+      }
+      renderPlayers();
+    }
+
+    
+    function renderVisualHint(puzzle) {
+      const el = document.getElementById('visual-hint');
+      if (!el || !puzzle) return;
+      const cat = puzzle.category || 'KINH THÁNH';
+      el.innerHTML = `
+        <div class="visual-hint-card flex flex-col items-center p-2 rounded-3xl bg-gradient-to-br from-[#fef3c7] to-[#fde68a] border-4 border-[#854d0e] shadow-xl" style="max-width:200px;">
+          <div style="font-size:48px;line-height:1;">✝️</div>
+          <div class="text-[#713f12] text-sm font-extrabold text-center mt-1">${cat}</div>
+          <div class="text-[#854d0e] text-[10px]">Gợi ý chủ đề / Topic</div>
+        </div>`;
+    }
+
+    function pickNewPuzzle() {
+      let available = PUZZLES.map((p, idx) => ({...p, idx}));
+      available = available.filter(p => !solvedPuzzles.has(p.idx));
+
+      if (available.length === 0) {
+        // No more unique puzzles in this game session
+        showEndScreen();
+        return;
+      }
+
+      const chosen = available[Math.floor(Math.random() * available.length)];
+      solvedPuzzles.add(chosen.idx);
+
+      currentPuzzle = chosen;
+      revealed = Array(chosen.phrase.length).fill(false);
+      usedLetters.clear();
+      currentStake = 0;
+      guessingMode = false;
+      roundSolved = false;
+
+      document.getElementById('category-label').textContent = currentPuzzle.category;
+
+      // Hide previous solved phrase when starting new puzzle
+      const solvedPhraseEl = document.getElementById('solved-phrase');
+      if (solvedPhraseEl) solvedPhraseEl.classList.add('hidden');
+
+      // Show bilingual question/prompt before the wheel spin (song ngữ cho chủ đề và gợi ý nội dung)
+      const qEl = document.getElementById('bilingual-question');
+      if (qEl) {
+        let catVN = currentPuzzle.category;
+        let catEN = currentPuzzle.category;
+        let hintVN = "Hãy quay bánh xe để đoán câu trả lời!";
+        let hintEN = "Spin the wheel to guess the answer!";
+        if (currentPuzzle.category === "KINH THÁNH") {
+          catVN = "Kinh Thánh";
+          catEN = "The Bible";
+          hintVN = "Gợi ý: Câu Kinh Thánh hoặc lời Chúa";
+          hintEN = "Hint: Bible verse or word of God";
+        } else if (currentPuzzle.category === "DỤ NGÔN") {
+          catVN = "Dụ Ngôn";
+          catEN = "Parable";
+          hintVN = "Gợi ý: Câu chuyện ngụ ngôn trong Kinh Thánh";
+          hintEN = "Hint: Parable story from the Bible";
+        } else if (currentPuzzle.category === "PHÚC ÂM") {
+          catVN = "Phúc Âm";
+          catEN = "Gospel";
+          hintVN = "Gợi ý: Lời Chúa Giêsu trong Phúc Âm";
+          hintEN = "Hint: Words of Jesus in the Gospel";
+        } else if (currentPuzzle.category === "LỜI CHÚA") {
+          catVN = "Lời Chúa";
+          catEN = "Word of God";
+          hintVN = "Gợi ý: Câu Kinh Thánh quan trọng";
+          hintEN = "Hint: Important Bible verse";
+        } else if (currentPuzzle.category === "THÁNH VỊNH") {
+          catVN = "Thánh Vịnh";
+          catEN = "Psalm";
+          hintVN = "Gợi ý: Lời ca ngợi trong Thánh Vịnh";
+          hintEN = "Hint: Praise from the Psalms";
+        } else if (currentPuzzle.category === "CÁC THÁNH") {
+          catVN = "Các Thánh";
+          catEN = "The Saints";
+          hintVN = "Gợi ý: Về Đức Maria hoặc các Thánh";
+          hintEN = "Hint: About Mary or the Saints";
+        }
+        qEl.innerHTML = `
+          <div class="uppercase text-[#d4af37] text-xs tracking-[2px] mb-1">CÂU HỎI / QUESTION</div>
+          <div class="font-bold text-base">
+            <span class="text-[#d4af37]">${catVN}</span> / <span class="text-[#64748b]">${catEN}</span>
+          </div>
+          <div class="mt-2 text-sm text-[#e2e8f0]">
+            <span class="font-semibold text-[#d4af37]">Gợi ý / Hint:</span> ${hintVN} / ${hintEN}
+          </div>
+        `;
+        qEl.classList.remove('hidden');
+      }
+
+      renderPuzzle();
+      if (typeof renderVisualHint === "function") renderVisualHint(currentPuzzle);
+      updateUI();
+      updateKeyboardState();
+    }
+
+    function renderPuzzle() {
+      const board = document.getElementById('puzzle-board');
+      board.innerHTML = '';
+      if (!currentPuzzle) return;
+
+      const phrase = currentPuzzle.phrase;
+      let i = 0;
+
+      while (i < phrase.length) {
+        if (phrase[i] === ' ') {
+          // Spacer between words for visual grouping (prevents letters from different words merging)
+          const spacer = document.createElement('div');
+          spacer.className = 'w-8 flex-shrink-0';
+          board.appendChild(spacer);
+          i++;
+          continue;
+        }
+
+        // Start a new word group: collect all consecutive non-space letters
+        // This ensures "NHA" in "Nha Trang" stays together on one line
+        const wordDiv = document.createElement('div');
+        wordDiv.className = `flex gap-x-2`;
+
+        while (i < phrase.length && phrase[i] !== ' ') {
+          const ch = phrase[i];
+          const isRevealed = revealed[i];
+
+          const tile = document.createElement('div');
+
+          const isActive = guessingMode;
+          tile.className = `puzzle-tile ${isRevealed ? 'revealed' : (isActive ? 'hidden-guess' : 'hidden')}`;
+
+          if (isRevealed) {
+            tile.innerHTML = `<span class="text-[#f4e9c8] text-2xl font-black">${ch}</span>`;
+          } else if (isActive) {
+            // Yellow square blanks (only after having points from spin)
+            tile.innerHTML = `<span style="color:#854d0e; font-size:36px; font-weight:900; line-height:1;">_</span>`;
+            tile.style.backgroundColor = '#ffeb3b';
+            tile.style.border = '6px solid #b45309';
+            tile.style.boxShadow = '0 0 0 5px #854d0e, inset 0 4px 8px rgba(0,0,0,0.12)';
+            tile.style.outline = '4px dashed #854d0e';
+            tile.style.outlineOffset = '-10px';
+          } else {
+            // Subtle blanks before spin
+            tile.innerHTML = `<span style="color:#475569; font-size:24px; font-weight:700; opacity:0.45;">_</span>`;
+            tile.style.backgroundColor = '';
+            tile.style.border = '';
+            tile.style.boxShadow = '';
+            tile.style.outline = '';
+            tile.style.outlineOffset = '';
+          }
+
+          wordDiv.appendChild(tile);
+          i++;
+        }
+
+        board.appendChild(wordDiv);
+      }
+    }
+
+    function updateUI() {
+      // Update player cards
+      renderPlayers();
+      updateCurrentPlayerUI();
+
+      // Stake display
+      const stakeEl = document.getElementById('stake-display');
+      if (currentStake > 0) {
+        stakeEl.innerHTML = `<span class="text-[#d4af37]">${currentStake}</span> <span class="text-[#64748b]">điểm / chữ</span>`;
+      } else {
+        stakeEl.textContent = '';
+      }
+
+      // Vowel button
+      const vowelBtn = document.getElementById('buy-vowel-btn');
+      const currentP = players[currentPlayerIndex];
+      vowelBtn.disabled = !guessingMode || !currentP || currentP.bank < 300;
+    }
+
+    function startNewTurn() {
+      clearTimer();
+      timeLeft = 45;
+      updateTimerUI();
+
+      guessingMode = false;
+      currentStake = 0;
+      roundSolved = false;
+
+      const currentP = players[currentPlayerIndex];
+      document.getElementById('spin-text').textContent = 'QUAY BÁNH XE';
+      document.getElementById('spin-btn').disabled = false;
+
+      updateUI();
+      updateKeyboardState();
+      renderPuzzle();  // reset remaining blanks to subtle style until this player spins
+      document.getElementById('puzzle-status').innerHTML = `Lượt của <span class="font-semibold text-[#d4af37]">${currentP.name}</span>. Hãy quay bánh xe!`;
+    }
+
+    // Ensure keyboard is updated whenever guessing becomes active
+    function updateGuessingMode() {
+      updateKeyboardState();
+    }
+
+    function updateTimerUI() {
+      const bar = document.getElementById('timer-bar');
+      const label = document.getElementById('timer-label');
+      const percent = Math.max(0, (timeLeft / 45) * 100);
+      bar.style.width = percent + '%';
+      label.textContent = timeLeft + 's';
+
+      if (timeLeft <= 10) {
+        bar.style.background = 'linear-gradient(to right, #ef4444, #f59e0b)';
+      } else {
+        bar.style.background = 'linear-gradient(to right, #d4af37, #f4e9c8)';
+      }
+    }
+
+    function clearTimer() {
+      if (timerInterval) {
+        clearInterval(timerInterval);
+        timerInterval = null;
+      }
+    }
+
+    function startGuessingTimer() {
+      clearTimer();
+      updateTimerUI();
+
+      timerInterval = setInterval(() => {
+        timeLeft--;
+        updateTimerUI();
+
+        // Running clock sound every second (tiếng đồng hồ chạy)
+        playSound('tick');
+
+        if (timeLeft <= 0) {
+          clearTimer();
+          playSound('timeout');
+          document.getElementById('puzzle-status').innerHTML = `<span class="text-red-400">Hết thời gian!</span> Chuyển lượt.`;
+          setTimeout(() => nextPlayer(), 900);
+        } else if (timeLeft <= 6) {
+          // Extra urgent double-tick near the end
+          setTimeout(() => playSound('tick'), 120);
+        }
+      }, 1000);
+    }
+
+    function startTimer() {
+      clearTimer();
+      timeLeft = 45;
+      startGuessingTimer();
+    }
+
+    function nextPlayer() {
+      clearTimer();
+      currentPlayerIndex = (currentPlayerIndex + 1) % players.length;
+      startNewTurn();
+    }
+
+    // ==================== WHEEL + ACTIONS ====================
+    function initWheel() {
+      canvas = document.getElementById('wheel-canvas');
+      ctx = canvas.getContext('2d');
+      drawWheel();
+    }
+
+    function spinWheel() {
+      if (spinning || roundSolved || !players[currentPlayerIndex]) {
+        if (roundSolved) {
+          const status = document.getElementById('puzzle-status');
+          if (status) status.innerHTML = `Đã có đáp án, không quay thêm được nữa!`;
+        }
+        return;
+      }
+
+      const spinBtn = document.getElementById('spin-btn');
+      spinBtn.disabled = true;
+      spinning = true;
+      lastSegmentForSound = -1;
+
+      initAudio();
+      playSound('spin');
+
+      // Chọn ô thắng trước → căn GIỮA ô dưới mũi tên
+      const nSeg = SEGMENTS.length;
+      const winIndex = Math.floor(Math.random() * nSeg);
+      const targetMod = rotationForSegmentCenter(winIndex);
+      const currentMod = ((wheelRotation % 360) + 360) % 360;
+      let delta = (targetMod - currentMod + 360) % 360;
+      if (delta < 40) delta += 360;
+      const extraSpins = 5 + Math.floor(Math.random() * 4);
+      const targetRotation = wheelRotation + extraSpins * 360 + delta;
+      window.__wheelWinIndex = winIndex;
+
+      const duration = 4800 + Math.random() * 1800;
+      const startRot = wheelRotation;
+      const startTime = performance.now();
+
+      function animate(now) {
+        const elapsed = now - startTime;
+        const t = Math.min(elapsed / duration, 1);
+        const eased = 1 - Math.pow(1 - t, 4);
+        wheelRotation = startRot + (targetRotation - startRot) * eased;
+        drawWheel();
+
+        // Prominent speed-based wheel spin sound: clicks faster & louder when spinning fast
+        if (t < 0.98) {
+          const currentSeg = getSegmentIndexAtPointer();
+          if (currentSeg !== lastSegmentForSound && lastSegmentForSound !== -1) {
+            const speedFactor = Math.max(0.15, 1 - t);  // loud at high speed, quiets as slows
+            playWheelClick(speedFactor);
+          }
+          lastSegmentForSound = currentSeg;
+        }
+
+        if (t < 1) {
+          requestAnimationFrame(animate);
+        } else {
+          wheelRotation = targetRotation;
+          if (typeof window.__wheelWinIndex === 'number') {
+            snapRotationToSegmentCenter(window.__wheelWinIndex);
+          }
+          drawWheel();
+          const winIdx = (typeof window.__wheelWinIndex === 'number') ? window.__wheelWinIndex : getSegmentIndexAtPointer();
+          const landed = { index: winIdx, segment: SEGMENTS[winIdx] };
+          handleWheelLand(landed.segment);
+
+          spinning = false;
+          spinBtn.disabled = false;
+        }
+      }
+      requestAnimationFrame(animate);
+    }
+
+    function handleWheelLand(segment) {
+      const status = document.getElementById('puzzle-status');
+      const currentP = players[currentPlayerIndex];
+
+      if (segment.type === 'bankrupt') {
+        currentP.bank = 0;
+        currentStake = 0;
+        guessingMode = false;
+        status.innerHTML = `<span class="text-red-400">PHÁ SẢN!</span> Mất hết điểm vòng này.`;
+        playSound('wrong');
+        updateUI();
+        setTimeout(() => nextPlayer(), 1400);
+      } 
+      else if (segment.type === 'lose_turn') {
+        currentStake = 0;
+        guessingMode = false;
+        status.innerHTML = `Mất lượt. Chuyển sang người chơi tiếp theo.`;
+        playSound('wrong');
+        updateUI();
+        setTimeout(() => nextPlayer(), 1200);
+      } 
+      else if (segment.type === 'double') {
+        if (currentP.bank > 0) currentP.bank = Math.floor(currentP.bank * 2);
+        currentStake = Math.max(600, currentStake);
+        guessingMode = true;
+        status.innerHTML = `GẤP ĐÔI! Tiếp tục đoán chữ.`;
+        playSound('correct');
+        startTimer();
+        updateUI();
+        updateKeyboardState();
+        renderPuzzle();  // yellow blanks "hiện ra" now that you have points
+      } 
+      else if (segment.type === 'time') {
+        timeLeft = Math.min(60, timeLeft + segment.value);
+        updateTimerUI();
+        currentStake = 400;
+        guessingMode = true;
+        status.innerHTML = `+15 GIÂY! Đoán chữ cái nào.`;
+        playSound('correct');
+        startTimer();
+        updateUI();
+        updateKeyboardState();
+        renderPuzzle();  // yellow blanks "hiện ra" now that you have points
+      } 
+      else {
+        currentStake = segment.value;
+        guessingMode = true;
+        status.innerHTML = `Được <span class="font-semibold text-[#d4af37]">${segment.value}</span> điểm. Hãy đoán một chữ cái!`;
+        playSound('correct');
+        startTimer();
+        updateUI();
+        updateKeyboardState();
+        renderPuzzle();  // yellow blanks "hiện ra" now that you have points
+      }
+
+      if (guessingMode) {
+        const qEl = document.getElementById('bilingual-question');
+        if (qEl) qEl.classList.add('hidden');
+      }
+    }
+
+    function guessLetter(letter, btnElement) {
+      if (!guessingMode || !currentPuzzle || !players[currentPlayerIndex]) return;
+
+      const upper = letter.toUpperCase();
+
+      // Strictly enforce: only consonants (phụ âm) can be chosen freely.
+      // Vowels must be bought via MUA NGUYÊN ÂM.
+      if (isVowel(upper)) {
+        const st = document.getElementById('puzzle-status');
+        if (st) st.innerHTML = `Nguyên âm phải mua mới được chọn!`;
+        return;
+      }
+
+      if (usedLetters.has(upper)) return;
+
+      usedLetters.add(upper);
+      const currentP = players[currentPlayerIndex];
+
+      const baseLetter = getBaseLetter(upper);
+      let found = false;
+      let count = 0;
+
+      currentPuzzle.phrase.split('').forEach((ch, i) => {
+        if (getBaseLetter(ch) === baseLetter && !revealed[i]) {
+          revealed[i] = true;
+          found = true;
+          count++;
+        }
+      });
+
+      renderPuzzle();
+
+      // Safety net: if all letters are now revealed (user chose all correct letters), force solve
+      if (revealed.every((r, i) => currentPuzzle.phrase[i] === ' ' || r)) {
+        clearTimer();
+        solvePuzzle();
+        return;
+      }
+
+      if (found) {
+        const points = currentStake * count;
+        currentP.bank += points;
+        playSound('correct');
+        document.getElementById('puzzle-status').innerHTML = `Đúng! +${points} điểm. Tiếp tục!`;
+
+        // Check if solved
+        if (revealed.every((r, i) => currentPuzzle.phrase[i] === ' ' || r)) {
+          clearTimer();
+          solvePuzzle();
+        } else {
+          // Reset timer a bit on success
+          timeLeft = Math.min(45, timeLeft + 8);
+          updateTimerUI();
+          updateUI();
+          updateKeyboardState();
+        }
+      } else {
+        playSound('wrong');
+        document.getElementById('puzzle-status').innerHTML = `Sai! Chuyển lượt.`;
+        clearTimer();
+        updateUI();
+        updateKeyboardState();
+        setTimeout(() => nextPlayer(), 850);
+      }
+
+      // Refresh keyboard state
+      updateKeyboardState();
+    }
+
+    function buyVowel() {
+      if (!guessingMode || !currentPuzzle || !players[currentPlayerIndex]) return;
+
+      const currentP = players[currentPlayerIndex];
+      if (currentP.bank < 300) return;
+
+      const vowelContainer = document.createElement('span');
+      const availableVowels = VOWELS.filter(v => !usedLetters.has(v));
+
+      if (availableVowels.length === 0) {
+        const status = document.getElementById('puzzle-status');
+        status.innerHTML = `Không còn nguyên âm nào để mua!`;
+        updateUI();
+        return;
+      }
+
+      // Deduct the cost when the player decides to "mua" (buy).
+      // Only after paying do they get to chọn (choose) which vowel to reveal.
+      currentP.bank -= 300;
+      updateUI();
+
+      const status = document.getElementById('puzzle-status');
+      status.innerHTML = `Đã mua nguyên âm (-300 điểm). Chọn một nguyên âm: `;
+
+      availableVowels.forEach(v => {
+        const b = document.createElement('button');
+        b.textContent = v;
+        b.className = `mx-1 px-2 py-0.5 text-sm rounded bg-[#d4af37] text-[#1a2744] font-bold`;
+        b.onclick = () => {
+          // Cost already paid on the "MUA NGUYÊN ÂM" click. Now just reveal the chosen vowel.
+          const targetKey = getVowelKey(v);
+          usedLetters.add(targetKey);
+          vowelContainer.remove();
+
+          let found = false;
+          let count = 0;
+          currentPuzzle.phrase.split('').forEach((ch, i) => {
+            // Match using getVowelKey so that buying plain "E" correctly reveals
+            // any E-family letter with tones (Ẹ, È, É, Ẻ, Ẽ, etc.) but not Ê or A-variants.
+            if (getVowelKey(ch) === targetKey && !revealed[i]) {
+              revealed[i] = true;
+              found = true;
+              count++;
+            }
+          });
+
+          renderPuzzle();
+          updateKeyboardState();
+
+          // Safety net for vowel buy completing the puzzle
+          if (revealed.every((r, i) => currentPuzzle.phrase[i] === ' ' || r)) {
+            clearTimer();
+            solvePuzzle();
+            return;
+          }
+
+          if (found) {
+            playSound('correct');
+            status.innerHTML = `Đúng nguyên âm! Tiếp tục!`;
+            if (revealed.every((r, i) => currentPuzzle.phrase[i] === ' ' || r)) {
+              clearTimer();
+              solvePuzzle();
+            } else {
+              updateUI();
+            }
+          } else {
+            playSound('wrong');
+            status.innerHTML = `Nguyên âm sai. Tiếp tục quay!`;
+            updateUI();
+            // Do not clearTimer or nextPlayer — keep the turn
+          }
+
+          // Mua nguyên âm (đúng hay sai) vẫn giữ lượt: không mất vòng quay.
+          // Cho phép tiếp tục quay bánh xe (re-enable spin button) hoặc tiếp tục đoán/buy/solve với lượt hiện tại.
+          const spinBtnEl = document.getElementById('spin-btn');
+          if (spinBtnEl) {
+            spinBtnEl.disabled = false;
+            document.getElementById('spin-text').textContent = 'QUAY BÁNH XE';
+          }
+          updateUI();
+        };
+        vowelContainer.appendChild(b);
+      });
+      status.appendChild(vowelContainer);
+    }
+
+    function attemptSolve() {
+      if (!currentPuzzle || !guessingMode || roundSolved) {
+        const st = document.getElementById('puzzle-status');
+        if (st) st.innerHTML = `Chỉ được giải đáp sau khi quay được điểm (lượt của bạn).`;
+        return;
+      }
+
+      const currentP = players[currentPlayerIndex];
+      if (!currentP) return;
+
+      const savedTimeLeft = timeLeft;
+      clearTimer();
+
+      // Timed solve modal (25s - vừa đủ để gõ câu đáp án)
+      const modal = document.createElement('div');
+      modal.className = 'fixed inset-0 bg-black/90 z-[400] flex items-center justify-center p-4';
+      modal.innerHTML = `
+        <div class="game-panel rounded-3xl p-6 max-w-md w-full border border-[#d4af37]">
+          <div class="flex justify-between items-center mb-3">
+            <div>
+              <div class="text-xl font-bold">GIẢI ĐÁP</div>
+              <div class="text-xs text-[#94a3b8]">Nhập đầy đủ câu trả lời</div>
+            </div>
+            <div class="text-right">
+              <div class="text-[10px] text-[#64748b]">THỜI GIAN</div>
+              <div id="solve-timer" class="font-mono text-3xl font-extrabold text-[#d4af37]">25</div>
+            </div>
+          </div>
+
+          <input id="solve-input" type="text" 
+                 class="w-full bg-[#1a2744] border-2 border-[#3a4266] focus:border-[#d4af37] rounded-2xl px-4 py-3 text-lg outline-none mb-4"
+                 placeholder="Gõ câu trả lời..." autofocus>
+
+          <div class="flex gap-3">
+            <button id="solve-submit"
+                    class="flex-1 py-3 rounded-2xl bg-gradient-to-r from-[#d4af37] to-[#b8972e] text-[#1a2744] font-extrabold tracking-[1px]">
+              NỘP BÀI
+            </button>
+            <button id="solve-cancel"
+                    class="flex-1 py-3 rounded-2xl bg-[#3a4266] hover:bg-[#475569] text-sm font-semibold">
+              HỦY
+            </button>
+          </div>
+          <div class="text-[10px] text-center text-[#64748b] mt-2">Hết giờ sẽ tự động nộp</div>
+        </div>
+      `;
+      document.body.appendChild(modal);
+
+      const input = modal.querySelector('#solve-input');
+      const timerEl = modal.querySelector('#solve-timer');
+      const submitBtn = modal.querySelector('#solve-submit');
+      const cancelBtn = modal.querySelector('#solve-cancel');
+
+      input.focus();
+      input.select();
+
+      let solveTimeLeft = 25;
+      let solveInterval = null;
+
+      function finishSolve(answer) {
+        if (solveInterval) clearInterval(solveInterval);
+        modal.remove();
+
+        const normalizedInput = normalizeForSolve(answer || '');
+        const normalizedAnswer = normalizeForSolve(currentPuzzle.phrase);
+
+        if (normalizedInput === normalizedAnswer) {
+          // Direct award so player clearly gets points when solving via GIẢI ĐÁP
+          // (fixes the repeated request: "khi đã giải đáp đúng đáp án thì được điểm")
+          let points = currentStake > 0 ? currentStake : 500;
+          const roundEarnings = currentP.bank || 0;
+          currentP.total += (points + roundEarnings);
+          currentP.bank = 0;
+          currentP._lastSolvePoints = points;
+
+          // Reveal all on the board
+          revealed = currentPuzzle.phrase.split('').map(ch => ch !== ' ');
+          renderPuzzle();
+
+          // Immediately refresh the player cards so the "TỔNG" visibly increases right when modal closes
+          renderPlayers();
+
+          solvePuzzle(true);
+
+          updateUI();
+
+          const st = document.getElementById('puzzle-status');
+          if (st) st.innerHTML = `Chính xác! Giải đúng! +${points} điểm`;
+        } else {
+          playSound('wrong');
+          document.getElementById('puzzle-status').innerHTML = `Sai! Chuyển lượt.`;
+          clearTimer();
+          updateUI();
+          setTimeout(() => nextPlayer(), 700);
+        }
+      }
+
+      // Submit
+      function doSubmit() {
+        finishSolve(input.value);
+      }
+      submitBtn.onclick = doSubmit;
+      input.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter') doSubmit();
+      });
+
+      // Cancel → resume main turn timer (remaining time, not reset)
+      cancelBtn.onclick = () => {
+        if (solveInterval) clearInterval(solveInterval);
+        modal.remove();
+        timeLeft = savedTimeLeft;
+        updateTimerUI();
+        startGuessingTimer();
+      };
+
+      // Countdown auto-submit
+      solveInterval = setInterval(() => {
+        solveTimeLeft--;
+        timerEl.textContent = solveTimeLeft;
+
+        if (solveTimeLeft <= 5) {
+          timerEl.style.color = '#f87171';
+        }
+        if (solveTimeLeft <= 0) {
+          clearInterval(solveInterval);
+          finishSolve(input.value);
+        }
+      }, 1000);
+    }
+
+    function solvePuzzle(bySolve = false, isAutoReveal = false) {
+      const currentP = players[currentPlayerIndex];
+      clearTimer();
+
+      // Add remaining bank to total (for non-GIẢI paths; for manual GIẢI the award was already done directly in attemptSolve)
+      let pointsAwarded = currentP.bank;
+      currentP.total += currentP.bank;
+      currentP.bank = 0;
+
+      playSound('win');
+      launchConfetti(160);
+
+      // Reveal everything on board
+      revealed = currentPuzzle.phrase.split('').map(ch => ch !== ' ');
+      renderPuzzle();
+      if (typeof renderVisualHint === "function") renderVisualHint(currentPuzzle);
+      updateUI();
+
+      // Show the FULL, CLEAR, READABLE original answer sentence in a big prominent banner
+      // ONLY when not a manual player GIẢI (to keep visual hint / image area clean per requirements).
+      // When player presses GIẢI ĐÁP and solves, letters are revealed but full text banner is hidden.
+      const solvedPhraseEl = document.getElementById('solved-phrase');
+      if (solvedPhraseEl) {
+        if (bySolve) {
+          solvedPhraseEl.innerHTML = '';
+          solvedPhraseEl.classList.add('hidden');
+        } else {
+          solvedPhraseEl.innerHTML = `
+            <div class="text-xs uppercase tracking-[2.5px] text-[#d4af37] mb-1 font-bold">ĐÁP ÁN / ANSWER</div>
+            <div style="font-size: 1.7rem; line-height: 1.35; word-break: keep-all; white-space: normal;" class="font-extrabold text-[#fefce8]">${currentPuzzle.phrase}</div>
+            <div style="font-size: 1rem; color: #d4af37; margin-top: 6px; font-style: italic;">${currentPuzzle.english || ''}</div>
+          `;
+          solvedPhraseEl.classList.remove('hidden');
+        }
+      }
+
+      // Once the full answer (ĐÁP ÁN) is shown, lock the wheel - no more spins allowed for this round
+      roundSolved = true;
+      const spinBtn = document.getElementById('spin-btn');
+      if (spinBtn) spinBtn.disabled = true;
+
+      // Keep status short and celebratory. Show points when available (from GIẢI direct award or bank transfer).
+      let displayPoints = pointsAwarded;
+      if (displayPoints <= 0 && currentP._lastSolvePoints) {
+        displayPoints = currentP._lastSolvePoints;
+      }
+      const pointsText = displayPoints > 0 ? ` +${displayPoints} điểm` : '';
+      document.getElementById('puzzle-status').innerHTML = `
+        Chính xác! <span class="text-[#d4af37] font-semibold">${currentP.name}</span> giải được!${pointsText}
+      `;
+      if (currentP._lastSolvePoints) delete currentP._lastSolvePoints;
+
+      setTimeout(() => {
+        roundNumber++;
+
+        // === QUY TẮC KẾT THÚC GAME (theo số người chơi) ===
+        // 2 người chơi: 3 hiệp thường + 1 Vòng Chung Kết
+        // 3 người chơi trở lên: 5 hiệp thường + 1 Vòng Chung Kết
+        // Sau Chung Kết hoặc hết câu trả lời (thành ngữ, món ăn, địa danh hoặc ca dao) → KẾT THÚC
+
+        const regularRounds = players.length <= 2 ? 3 : 5;
+        const finalRoundNumber = regularRounds + 1;
+
+        const shouldFinal = (roundNumber >= finalRoundNumber || solvedPuzzles.size >= PUZZLES.length - 2) && !isFinalRound;
+
+        if (shouldFinal && players.length >= 2) {
+          enterFinalRound();
+        } else if (isFinalRound || roundNumber > finalRoundNumber || solvedPuzzles.size >= PUZZLES.length) {
+          showEndScreen();
+        } else {
+          // Clean flow: after showing full answer, directly go to next puzzle.
+          // No random quick question interrupting right after the đáp án is revealed.
+          pickNewPuzzle();
+          startNewTurn();
+        }
+      }, 3800);  // time to read the full "ĐÁP ÁN" banner
+    }
+
+    function enterFinalRound() {
+      isFinalRound = true;
+      clearTimer();
+
+      // Sort players by total score, keep top 2
+      players.sort((a, b) => b.total - a.total);
+      players = players.slice(0, 2);
+
+      currentPlayerIndex = 0;
+      document.getElementById('player-count-display').textContent = 'VÒNG CHUNG KẾT (2 NGƯỜI)';
+
+      // Special final puzzle
+      pickNewPuzzle();
+      currentPuzzle.category = "VÒNG CHUNG KẾT • KINH THÁNH";
+
+      document.getElementById('puzzle-status').innerHTML = `VÒNG CHUNG KẾT! Top 2 tranh tài. Điểm gấp đôi!`;
+
+      renderPlayers();
+      updateUI();
+
+      // Boost background music for maximum "tranh hùng" (competitive) atmosphere
+      if (musicEnabled) {
+        startBackgroundMusic();
+      }
+
+      // In final round, give a big stake immediately and start timer
+      setTimeout(() => {
+        currentStake = 2000;
+        guessingMode = true;
+        startTimer();
+        document.getElementById('puzzle-status').innerHTML = `Điểm gấp đôi! Nhanh tay đoán hoặc giải đáp!`;
+        updateUI();
+        renderPuzzle();  // activate yellow blanks immediately in final round
+      }, 1600);
+    }
+
+    function initKeyboard() {
+      const container = document.getElementById('keyboard');
+      container.innerHTML = '';
+
+      KEYBOARD_LETTERS.forEach(letter => {
+        const btn = document.createElement('button');
+        btn.textContent = letter;
+        btn.className = `h-9 sm:h-10 rounded-2xl border text-base sm:text-lg bg-[#1a2744] border-[#3a4266] text-[#e2e8f0] hover:bg-[#242e52] active:scale-95 transition`;
+        btn.onclick = () => guessLetter(letter, btn);
+        container.appendChild(btn);
+      });
+
+      // Physical keyboard support
+      document.addEventListener('keydown', (e) => {
+        if (!guessingMode || spinning || quickQuestionActive) return;
+        const key = e.key.toUpperCase();
+        if (KEYBOARD_LETTERS.includes(key) && !usedLetters.has(key)) {
+          const buttons = container.querySelectorAll('button');
+          buttons.forEach(b => {
+            if (b.textContent === key && !b.disabled) {
+              guessLetter(key, b);
+            }
+          });
+        }
+      });
+    }
+
+    function updateKeyboardState() {
+      const container = document.getElementById('keyboard');
+      if (!container) return;
+      const buttons = container.querySelectorAll('button');
+      buttons.forEach(btn => {
+        const letter = btn.textContent;
+        if (usedLetters.has(letter)) {
+          btn.disabled = true;
+          btn.classList.add('opacity-40', 'line-through', 'bg-[#0f1629]');
+          btn.classList.remove('hover:bg-[#242e52]');
+        } else {
+          btn.disabled = false;
+          btn.classList.remove('opacity-40', 'line-through', 'bg-[#0f1629]');
+        }
+      });
+    }
+
+    // ==================== END + RESET ====================
+    function showEndScreen() {
+      const modal = document.getElementById('end-modal');
+      const winnerName = document.getElementById('winner-name');
+      const scoresDiv = document.getElementById('final-scores');
+
+      // Find winner
+      let winner = players[0];
+      players.forEach(p => {
+        if (p.total > winner.total) winner = p;
+      });
+
+      winnerName.innerHTML = `<span class="text-[#d4af37]">${winner.name}</span>`;
+
+      scoresDiv.innerHTML = players.map(p => `
+        <div class="flex justify-between items-center px-4 py-2 rounded-2xl ${p.id === winner.id ? 'bg-[#1a2744] border border-[#d4af37]' : 'bg-[#0f1629]'}">
+          <div class="font-semibold">${p.name}</div>
+          <div class="tabular-nums font-mono text-xl text-[#d4af37]">${p.total}</div>
+        </div>
+      `).join('');
+
+      modal.classList.remove('hidden');
+      modal.classList.add('flex');
+    }
+
+    function hideEndModal() {
+      const modal = document.getElementById('end-modal');
+      modal.classList.remove('flex');
+      modal.classList.add('hidden');
+    }
+
+    function restartFullGame() {
+      // Reset everything and show player selection again
+      const __mainR = document.getElementById('main-game');
+      __mainR.classList.add('hidden');
+      __mainR.classList.remove('is-active');
+      document.body.classList.remove('tv-playing');
+      document.getElementById('player-setup').classList.remove('hidden');
+      document.getElementById('end-modal').classList.add('hidden');
+
+      // Clear state
+      if (timerInterval) clearInterval(timerInterval);
+      players = [];
+      currentPlayerIndex = 0;
+      solvedPuzzles.clear();
+      roundNumber = 1;
+      roundSolved = false;
+    }
+
+    function showHowToPlay() {
+      const m = document.getElementById('how-modal');
+      m.classList.remove('hidden');
+      m.classList.add('flex');
+    }
+
+    function hideHowToPlay() {
+      const m = document.getElementById('how-modal');
+      m.classList.remove('flex');
+      m.classList.add('hidden');
+    }
+
+    // ==================== BACKGROUND MUSIC & EFFECTS ====================
+    function toggleBackgroundMusic() {
+      musicEnabled = !musicEnabled;
+      const btn = document.getElementById('music-btn');
+      if (!btn) return;
+
+      if (musicEnabled) {
+        btn.innerHTML = `<i class="fa-solid fa-volume-up"></i> <span class="hidden sm:inline">TẮT NHẠC</span>`;
+        startBackgroundMusic();
+      } else {
+        btn.innerHTML = `<i class="fa-solid fa-volume-mute"></i> <span class="hidden sm:inline">BẬT NHẠC</span>`;
+        stopBackgroundMusic();
+      }
+    }
+
+    function startBackgroundMusic() {
+      if (!audioCtx) initAudio();
+      stopBackgroundMusic();
+
+      // Detect tension for dynamic orchestral intensity
+      const tense = isFinalRound || (guessingMode && currentStake >= 800);
+
+      // Chord change interval: slower for peaceful sacred feel, faster + more movement in tense/competitive moments
+      const chordChangeMs = tense ? 2600 : 4800;
+
+      backgroundMusicInterval = setInterval(() => {
+        if (!musicEnabled || !audioCtx) return;
+        const now = audioCtx.currentTime;
+
+        // === ORCHESTRAL CHORDS (nhạc hoà tấu nền) ===
+        // Sacred, noble harmony with string + brass + woodwind layers
+        // Tense mode: more urgent minor tensions, added brass power, slightly faster movement
+        let chord;
+        if (tense) {
+          // Competitive / dramatic minor with tension (rising feel for "tranh hùng")
+          chord = [110, 147, 175, 220, 262, 330]; // A minor + 9th/extensions
+        } else {
+          // Warm, noble orchestral pad for sacred Kinh Thánh atmosphere
+          chord = [98, 131, 165, 196, 247, 294]; // Warm G minor-ish pad
+        }
+
+        chord.forEach((baseFreq, idx) => {
+          // Layer 1: Rich string pad (multiple detuned sines + triangle for ensemble warmth)
+          const string1 = audioCtx.createOscillator();
+          string1.type = 'sine';
+          string1.frequency.value = baseFreq * (1 + (idx % 3) * 0.004); // natural detuning
+
+          const string2 = audioCtx.createOscillator();
+          string2.type = 'triangle';
+          string2.frequency.value = baseFreq * 1.005;
+
+          const strFilter = audioCtx.createBiquadFilter();
+          strFilter.type = 'lowpass';
+          strFilter.frequency.value = tense ? 2100 : 1450;
+
+          const strGain = audioCtx.createGain();
+          const baseVol = tense ? 0.018 : 0.012;
+          strGain.gain.value = baseVol / (idx + 2.5);
+          strGain.gain.linearRampToValueAtTime(0.0001, now + (tense ? 5.8 : 8.5));
+
+          string1.connect(strFilter);
+          string2.connect(strFilter);
+          strFilter.connect(strGain);
+          strGain.connect(audioCtx.destination);
+
+          string1.start(now);
+          string2.start(now);
+          string1.stop(now + (tense ? 6.2 : 9));
+          string2.stop(now + (tense ? 6.2 : 9));
+
+          // Layer 2: Soft brass/ horn swell (sawtooth with filter for power and grandeur)
+          if (idx % 2 === 0) {
+            const brass = audioCtx.createOscillator();
+            brass.type = 'sawtooth';
+            brass.frequency.value = baseFreq * 0.5; // octave lower for weight
+
+            const bFilter = audioCtx.createBiquadFilter();
+            bFilter.type = 'lowpass';
+            bFilter.frequency.value = tense ? 950 : 650;
+
+            const bGain = audioCtx.createGain();
+            bGain.gain.value = (tense ? 0.022 : 0.014) / (idx + 3);
+            // Gentle swell
+            bGain.gain.setValueAtTime(0.002, now);
+            bGain.gain.linearRampToValueAtTime(bGain.gain.value, now + 0.8);
+            bGain.gain.linearRampToValueAtTime(0.0001, now + (tense ? 5.5 : 7.8));
+
+            brass.connect(bFilter);
+            bFilter.connect(bGain);
+            bGain.connect(audioCtx.destination);
+
+            brass.start(now);
+            brass.stop(now + (tense ? 6 : 8.2));
+          }
+        });
+
+        // High woodwind / flute accent (light, ethereal top line) - more frequent in tense
+        const accentChance = tense ? 0.7 : 0.35;
+        if (Math.random() < accentChance) {
+          setTimeout(() => {
+            if (!musicEnabled || !audioCtx) return;
+            const flute = audioCtx.createOscillator();
+            flute.type = 'sine';
+            flute.frequency.value = tense ? 880 + Math.random() * 120 : 660 + Math.random() * 80;
+
+            const fGain = audioCtx.createGain();
+            fGain.gain.value = tense ? 0.025 : 0.016;
+            fGain.gain.linearRampToValueAtTime(0.0001, audioCtx.currentTime + (tense ? 3.2 : 4.5));
+
+            const fFilter = audioCtx.createBiquadFilter();
+            fFilter.type = 'lowpass';
+            fFilter.frequency.value = 2200;
+
+            flute.connect(fFilter);
+            fFilter.connect(fGain);
+            fGain.connect(audioCtx.destination);
+
+            flute.start();
+            flute.stop(audioCtx.currentTime + (tense ? 3.8 : 5));
+          }, 650);
+        }
+
+        // Subtle brass "call" or power accent in high tension (Chung Kết / big stake)
+        if (tense && Math.random() > 0.55) {
+          setTimeout(() => {
+            if (!musicEnabled || !audioCtx) return;
+            const horn = audioCtx.createOscillator();
+            horn.type = 'sawtooth';
+            horn.frequency.value = 175;
+
+            const hFilter = audioCtx.createBiquadFilter();
+            hFilter.type = 'lowpass';
+            hFilter.frequency.value = 780;
+
+            const hGain = audioCtx.createGain();
+            hGain.gain.value = 0.035;
+            hGain.gain.linearRampToValueAtTime(0.0001, audioCtx.currentTime + 2.8);
+
+            horn.connect(hFilter);
+            hFilter.connect(hGain);
+            hGain.connect(audioCtx.destination);
+
+            horn.start();
+            horn.stop(audioCtx.currentTime + 3.2);
+          }, 1100);
+        }
+      }, chordChangeMs);
+    }
+
+    function stopBackgroundMusic() {
+      if (backgroundMusicInterval) {
+        clearInterval(backgroundMusicInterval);
+        backgroundMusicInterval = null;
+      }
+    }
+
+    // Enhanced confetti with cross symbols
+    function launchFaithConfetti(count = 140) {
+      launchConfetti(count);
+      // Add small crosses
+      for (let i = 0; i < Math.floor(count / 3); i++) {
+        const c = document.createElement('div');
+        c.className = 'confetti';
+        c.innerHTML = `<i class="fa-solid fa-cross text-[#d4af37]" style="font-size:11px"></i>`;
+        c.style.left = Math.random() * 100 + 'vw';
+        c.style.top = '-15px';
+        c.style.background = 'transparent';
+        c.style.width = 'auto';
+        c.style.height = 'auto';
+        document.body.appendChild(c);
+
+        c.animate([
+          { transform: `translateY(0) rotate(0deg)`, opacity: 0.9 },
+          { transform: `translateY(${window.innerHeight + 80}px) rotate(${Math.random()*360 - 180}deg)`, opacity: 0 }
+        ], { duration: 2400 + Math.random()*1200, easing: 'linear' }).onfinish = () => c.remove();
+      }
+    }
+
+    // ==================== INIT ====================
+    function init() {
+      initTailwind();
+
+      // Default to 4 players with name inputs visible
+      setTimeout(() => {
+        selectPlayerCount(4);
+      }, 50);
+
+      // Pre-draw wheel lightly
+      setTimeout(() => {
+        const c = document.getElementById('wheel-canvas');
+        if (c && !document.getElementById('main-game').classList.contains('hidden')) {
+          drawWheel();
+        }
+      }, 400);
+
+      console.log('%c[Vòng Quay Kinh Thánh] Game đã nâng cấp: 2-5 người, tên tùy chỉnh, vòng chung kết, câu hỏi nhanh, nhạc nền, song ngữ, khóa quay sau đáp án.', 'color:#64748b');
+    }
+
+    // TV resize + phím F fullscreen
+    let __tvResizeTimer = null;
+    window.addEventListener('resize', () => {
+      clearTimeout(__tvResizeTimer);
+      __tvResizeTimer = setTimeout(() => {
+        const m = document.getElementById('main-game');
+        if (m && m.classList.contains('is-active') && typeof sizeWheelToScreen === 'function') sizeWheelToScreen();
+      }, 150);
+    });
+    document.addEventListener('keydown', (e) => {
+      if ((e.key === 'f' || e.key === 'F') && !e.metaKey && !e.ctrlKey && !e.altKey) {
+        const t = e.target;
+        if (t && (t.tagName === 'INPUT' || t.tagName === 'TEXTAREA' || t.isContentEditable)) return;
+        e.preventDefault();
+        if (typeof toggleFullscreen === 'function') toggleFullscreen();
+      }
+    });
+    window.onload = init;
+  </script>
+</body>
+</html>
